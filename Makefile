@@ -11,7 +11,7 @@ OBJS=$(patsubst %.c,%.o,$(SOURCES))
 
 # debug and release variables
 release:LDLIBS+=-lrocket-player
-release:CFLAGS+=-Os
+release:CFLAGS+=-Os -s -DSYNC_PLAYER
 debug:LDLIBS+=-lrocket
 debug:CFLAGS+=-g -DDEBUG
 
