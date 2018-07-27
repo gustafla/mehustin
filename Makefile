@@ -11,6 +11,7 @@ SOURCES=main.c player.c demo.c
 OBJS=$(patsubst %.c,%.o,$(SOURCES))
 
 $(TARGET): $(OBJS)
+	cd lib/rocket; make lib/librocket.a lib/librocket-player.a
 	$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LDLIBS)
 
 %.o: %.c
