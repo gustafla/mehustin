@@ -31,16 +31,19 @@ debug: $(TARGET)
 release: $(TARGET)
 
 # package release files
-install: $(TARGET)
-	install -d $(PREFIX)/data
-	cp $(TARGET) $(PREFIX)/data/
-	cp *.vert $(PREFIX)/data/
-	cp *.frag $(PREFIX)/data/
-	cp *.track $(PREFIX)/data/
-	cp music.ogg $(PREFIX)/data/
-	cp README.md $(PREFIX)/
+install: $(TARGET) LICENSE demo.sh
+	install -d $(PREFIX)/bin
+	install -d $(PREFIX)/src
+	cp $(TARGET) $(PREFIX)/bin/
+	cp *.vert $(PREFIX)/bin/ || :
+	cp *.frag $(PREFIX)/bin/ || :
+	cp *.track $(PREFIX)/bin/ || :
+	cp music.ogg $(PREFIX)/bin/ || :
+	cp README.md $(PREFIX)/ || :
 	cp LICENSE $(PREFIX)/
 	cp demo.sh $(PREFIX)/
+	git clone ./ $(PREFIX)/src
+	cd $(PREFIX)/src; git remote remove origin
 
 clean:
 	rm -f $(TARGET) $(OBJS)

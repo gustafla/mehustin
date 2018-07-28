@@ -1,4 +1,5 @@
 demo
+release/
 *.o
 *.track
 *.ogg
