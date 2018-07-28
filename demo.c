@@ -1,7 +1,6 @@
 #include "demo.h"
 #include <SDL.h>
 
-#define GET(x) demo_sync_get_value(demo, x)
 
 // constants for rocket sync
 static const float BPM = 120; // beats per minute
@@ -97,7 +96,7 @@ void demo_recompile(demo_t *demo) {
     
 }
 
-float demo_sync_get_value(demo_t* demo, const char *name) {
+float demo_sync_get_value(const demo_t *demo, const char *name) {
     // ugly because sync_get_track takes long, should keep tracks cached
     return sync_get_val(sync_get_track(demo->rocket, name), demo->row);
 }

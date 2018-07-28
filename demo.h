@@ -1,6 +1,8 @@
 #ifndef DEMO_H
 #define DEMO_H
 
+#define GET(x) demo_sync_get_value(demo, x)
+
 #include <stddef.h>
 #include "player.h"
 #include "sync.h"
@@ -16,6 +18,6 @@ demo_t *demo_init();
 void demo_free(demo_t*);
 void demo_render(demo_t*);
 void demo_recompile(demo_t*);
-float demo_sync_get_value(demo_t*, const char*);
+float demo_sync_get_value(const demo_t*, const char*);
 
 #endif

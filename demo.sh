@@ -1,3 +1,3 @@
 #!/bin/sh
-cd data
+cd bin
 ./demo
