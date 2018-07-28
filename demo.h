@@ -8,8 +8,8 @@
 #include "sync.h"
 
 typedef struct {
-    float time;
-    float row;
+    double time;
+    double row;
     player_t *player;
     struct sync_device *rocket;
     int width;
@@ -20,6 +20,6 @@ demo_t *demo_init(player_t*, int, int);
 void demo_free(demo_t*);
 void demo_render(demo_t*);
 void demo_recompile(demo_t*);
-float demo_sync_get_value(const demo_t*, const char*);
+double demo_sync_get_value(const demo_t*, const char*);
 
 #endif

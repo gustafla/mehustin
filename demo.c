@@ -3,9 +3,9 @@
 #include <GL/gl.h>
 
 // constants for rocket sync
-static const float BPM = 120; // beats per minute
-static const int RPB = 8; // rows per beat
-static const float ROW_RATE = (BPM / 60.f) * RPB; // rows per second
+static const double BPM = 120; // beats per minute
+static const double RPB = 8; // rows per beat
+static const double ROW_RATE = (BPM / 60.) * RPB; // rows per second
 
 // rocket editor sync with music player
 #ifndef SYNC_PLAYER
@@ -46,6 +46,7 @@ demo_t *demo_init(player_t *player, int width, int height) {
     demo->rocket = sync_create_device("sync");
     if (!demo->rocket) {
         fprintf(stderr, "sync_create_device failed\n");
+        demo_free(demo);
         return NULL;
     }
 
@@ -53,6 +54,7 @@ demo_t *demo_init(player_t *player, int width, int height) {
 #ifndef SYNC_PLAYER
     if (sync_tcp_connect(demo->rocket, "localhost", SYNC_DEFAULT_PORT)) {
         fprintf(stderr, "sync_tcp_connect failed\n");
+        demo_free(demo);
         return NULL;
     }
 #endif
@@ -69,11 +71,13 @@ demo_t *demo_init(player_t *player, int width, int height) {
 }
 
 void demo_free(demo_t *demo) {
-    // save tracks to librocket-player format
+    if (demo->rocket) {
 #ifndef SYNC_PLAYER
-    sync_save_tracks(demo->rocket);
+        // save tracks to librocket-player format
+        sync_save_tracks(demo->rocket);
 #endif
-    sync_destroy_device(demo->rocket);
+        sync_destroy_device(demo->rocket);
+    }
     free(demo);
 }
 
@@ -81,7 +85,7 @@ void demo_render(demo_t *demo) {
     // get time from player and convert to rocket row
     player_t *player = demo->player;
     SDL_LockAudioDevice(player->audio_device);
-    float byte_at = player->playback.pos;
+    double byte_at = player->playback.pos;
     SDL_UnlockAudioDevice(player->audio_device);
     demo->time = byte_at / player->spec.channels / sizeof(Uint16) / player->spec.freq;
     demo->row = demo->time * ROW_RATE;
@@ -101,7 +105,7 @@ void demo_recompile(demo_t *demo) {
     
 }
 
-float demo_sync_get_value(const demo_t *demo, const char *name) {
+double demo_sync_get_value(const demo_t *demo, const char *name) {
     // ugly because sync_get_track takes long, should keep tracks cached
     return sync_get_val(sync_get_track(demo->rocket, name), demo->row);
 }

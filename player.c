@@ -36,6 +36,10 @@ player_t *player_init(const char *vorbis_file_path) {
         return NULL;
     }
 
+    // cast audio to bytes for playback and compute size in bytes
+    player->playback.data = (Uint8*)audio;
+    player->playback.bytes = samples * channels * sizeof(short);
+
     // this spec needed to play the file back
     SDL_AudioSpec desired = {
         .freq = sample_rate,
@@ -54,9 +58,6 @@ player_t *player_init(const char *vorbis_file_path) {
         return NULL;
     }
 
-    // cast audio to bytes for playback and compute size in bytes
-    player->playback.data = (Uint8*)audio;
-    player->playback.bytes = samples * channels * sizeof(short);
     return player;
 }
 
