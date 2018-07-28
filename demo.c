@@ -1,5 +1,6 @@
 #include "demo.h"
 #include <SDL.h>
+#include <GL/gl.h>
 
 // constants for rocket sync
 static const float BPM = 120; // beats per minute
@@ -41,9 +42,6 @@ demo_t *demo_init(player_t *player, int width, int height) {
     demo_t *demo = calloc(1, sizeof(demo_t));
     if (!demo) return NULL;
 
-    demo->width = width;
-    demo->height = height;
-
     // init rocket
     demo->rocket = sync_create_device("sync");
     if (!demo->rocket) {
@@ -58,6 +56,11 @@ demo_t *demo_init(player_t *player, int width, int height) {
         return NULL;
     }
 #endif
+
+    // set resolution
+    demo->width = width;
+    demo->height = height;
+    glViewport(0, 0, width, height);
 
     // start music
     demo->player = player;
