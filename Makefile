@@ -1,7 +1,7 @@
 # common variables
 TARGET=demo
 CC=gcc
-PREFIX=~/.local
+PREFIX=release
 PKGS=sdl2 gl
 CFLAGS+=$(shell pkg-config --cflags $(PKGS)) -Ilib/stb -Ilib/rocket/lib -DGL_GLEXT_PROTOTYPES
 LFLAGS+=-Llib/rocket/lib
@@ -30,9 +30,17 @@ debug: $(TARGET)
 
 release: $(TARGET)
 
+# package release files
 install: $(TARGET)
-	install -d $(PREFIX)/bin/
-	cp $(TARGET) $(PREFIX)/bin/
+	install -d $(PREFIX)/data
+	cp $(TARGET) $(PREFIX)/data/
+	cp *.vert $(PREFIX)/data/
+	cp *.frag $(PREFIX)/data/
+	cp *.track $(PREFIX)/data/
+	cp music.ogg $(PREFIX)/data/
+	cp README.md $(PREFIX)/
+	cp LICENSE $(PREFIX)/
+	cp demo.sh $(PREFIX)/
 
 clean:
 	rm -f $(TARGET) $(OBJS)
