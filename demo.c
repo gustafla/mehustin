@@ -87,12 +87,13 @@ void demo_render(demo_t *demo) {
     SDL_LockAudioDevice(player->audio_device);
     double byte_at = player->playback.pos;
     SDL_UnlockAudioDevice(player->audio_device);
-    demo->time = byte_at / player->spec.channels / sizeof(Uint16) / player->spec.freq;
+    demo->time = byte_at / player->spec.channels / sizeof(Uint16)
+        / player->spec.freq;
     demo->row = demo->time * ROW_RATE;
 
 #ifndef SYNC_PLAYER
     // update rocket
-    if (sync_update(demo->rocket, (int)floor(demo->row), &player_cb, (void*)player)) {
+    if (sync_update(demo->rocket, (int)demo->row, &player_cb, (void*)player)) {
         sync_tcp_connect(demo->rocket, "localhost", SYNC_DEFAULT_PORT);
     }
 #endif
