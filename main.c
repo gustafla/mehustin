@@ -4,6 +4,18 @@
 #include "demo.h"
 
 int main(int argc, char *argv[]) {
+    // figure out width and height of window
+    if (argc < 3) {
+        fprintf(stderr, "width and height required as args\n");
+        return EXIT_FAILURE;
+    }
+    int width = atoi(argv[1]);
+    int height = atoi(argv[2]);
+    if (width <= 0 || height <= 0) {
+        fprintf(stderr, "incorrect arguments\n");
+        return EXIT_FAILURE;
+    }
+
     // start sdl video (+events) and audio
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         fprintf(stderr, "SDL2 failed to initialize %s\n", SDL_GetError());
@@ -26,7 +38,7 @@ int main(int argc, char *argv[]) {
     SDL_Window *window = SDL_CreateWindow(
             "Mehu | Assembly 2018",
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            1280, 720,
+            width, height,
             SDL_WINDOW_OPENGL
 #ifndef DEBUG
             | SDL_WINDOW_FULLSCREEN
@@ -45,7 +57,7 @@ int main(int argc, char *argv[]) {
     }
 
     // connect/init rocket and prepare demo for rendering
-    demo_t *demo = demo_init(player);
+    demo_t *demo = demo_init(player, width, height);
     if (!demo) {
         fprintf(stderr, "Demo failed to initialize\n");
         return EXIT_FAILURE;

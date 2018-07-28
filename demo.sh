@@ -1,3 +1,3 @@
 #!/bin/sh
 cd bin
-./demo
+./demo 1280 720

@@ -1,7 +1,6 @@
 #include "demo.h"
 #include <SDL.h>
 
-
 // constants for rocket sync
 static const float BPM = 120; // beats per minute
 static const int RPB = 8; // rows per beat
@@ -38,9 +37,12 @@ static struct sync_cb player_cb = {
 };
 #endif
 
-demo_t *demo_init(player_t *player) {
+demo_t *demo_init(player_t *player, int width, int height) {
     demo_t *demo = calloc(1, sizeof(demo_t));
     if (!demo) return NULL;
+
+    demo->width = width;
+    demo->height = height;
 
     // init rocket
     demo->rocket = sync_create_device("sync");
