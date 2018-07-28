@@ -11,7 +11,7 @@ size_t read_file_to_str(char **dst, char *filename) {
     fseek(file, 0, SEEK_END);
     size_t len = ftell(file);
     if (!len) {
-        return 0; // Don't read and malloc an empty file
+        return 0; // don't read and malloc an empty file
     }
     *dst = (char*)malloc(len+1);
     fseek(file, 0, SEEK_SET);

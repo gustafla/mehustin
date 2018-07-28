@@ -8,7 +8,7 @@ static const float BPM = 120; // beats per minute
 static const int RPB = 8; // rows per beat
 static const float ROW_RATE = (BPM / 60.f) * RPB; // rows per second
 
-// Rocket editor sync with music player
+// rocket editor sync with music player
 #ifndef SYNC_PLAYER
 static void player_pause(void *d, int flag) {
     player_t *player = (player_t*)d;
@@ -43,14 +43,14 @@ demo_t *demo_init(player_t *player) {
     demo_t *demo = calloc(1, sizeof(demo_t));
     if (!demo) return NULL;
 
-    // Init rocket
+    // init rocket
     demo->rocket = sync_create_device("sync");
     if (!demo->rocket) {
         fprintf(stderr, "sync_create_device failed\n");
         return NULL;
     }
 
-    // Connect rocket
+    // connect rocket
 #ifndef SYNC_PLAYER
     if (sync_tcp_connect(demo->rocket, "localhost", SYNC_DEFAULT_PORT)) {
         fprintf(stderr, "sync_tcp_connect failed\n");
@@ -58,7 +58,7 @@ demo_t *demo_init(player_t *player) {
     }
 #endif
 
-    // Start music
+    // start music
     demo->player = player;
     SDL_PauseAudioDevice(player->audio_device, 0);
     return demo;
