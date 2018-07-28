@@ -2,11 +2,11 @@
 TARGET=demo
 CC=gcc
 PREFIX=~/.local
-PKGS=sdl2
-CFLAGS+=$(shell pkg-config --cflags $(PKGS)) -Ilib/stb -Ilib/rocket/lib
+PKGS=sdl2 gl
+CFLAGS+=$(shell pkg-config --cflags $(PKGS)) -Ilib/stb -Ilib/rocket/lib -DGL_GLEXT_PROTOTYPES
 LFLAGS+=-Llib/rocket/lib
 LDLIBS+=$(shell pkg-config --libs $(PKGS)) -lm
-SOURCES=main.c player.c demo.c
+SOURCES=main.c player.c demo.c gl_util.c read_file.c
 OBJS=$(patsubst %.c,%.o,$(SOURCES))
 
 # debug and release variables
