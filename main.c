@@ -32,7 +32,8 @@ int main(int argc, char *argv[]) {
     // opengl attributes
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+            SDL_GL_CONTEXT_PROFILE_CORE);
 
     // get an opengl capable window
     SDL_Window *window = SDL_CreateWindow(
@@ -45,14 +46,16 @@ int main(int argc, char *argv[]) {
 #endif
             );
     if (!window) {
-        fprintf(stderr, "SDL2 failed to initialize a window %s\n", SDL_GetError());
+        fprintf(stderr, "SDL2 failed to initialize a window %s\n",
+                SDL_GetError());
         return EXIT_FAILURE;
     }
 
     // get an opengl context
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     if (!gl_context) {
-        fprintf(stderr, "SDL2 failed to create OpenGL context %s\n", SDL_GetError());
+        fprintf(stderr, "SDL2 failed to create OpenGL context %s\n",
+                SDL_GetError());
         return EXIT_FAILURE;
     }
 

@@ -18,7 +18,8 @@ static void player_pause(void *d, int flag) {
 static void player_set_row(void *d, int row) {
     player_t *player = (player_t*)d;
     // desired row to byte
-    size_t pos = row / ROW_RATE * player->spec.channels * sizeof(Uint16) * player->spec.freq;
+    size_t pos = row / ROW_RATE * player->spec.channels * sizeof(Uint16)
+        * player->spec.freq;
     // align byte position to first byte of left sample
     pos -= pos % (player->spec.channels * sizeof(Uint16));
     // update player position
