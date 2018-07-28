@@ -98,7 +98,6 @@ void demo_render(demo_t *demo) {
 #endif
 
     // render
-    printf("%f\n", GET("test"));
 }
 
 void demo_recompile(demo_t *demo) {
