@@ -40,9 +40,8 @@ static struct sync_cb player_cb = {
 #endif
 
 demo_t *demo_init(player_t *player) {
-    demo_t *demo = malloc(sizeof(demo_t));
+    demo_t *demo = calloc(1, sizeof(demo_t));
     if (!demo) return NULL;
-    memset(demo, 0, sizeof(demo_t));
 
     // Init rocket
     demo->rocket = sync_create_device("sync");

@@ -22,9 +22,8 @@ void callback(void *userdata, Uint8 *stream, int len) {
 }
 
 player_t *player_init(const char *vorbis_file_path) {
-    player_t *player = malloc(sizeof(player_t));
+    player_t *player = calloc(1, sizeof(player_t));
     if (!player) return NULL;
-    memset(player, 0, sizeof(player_t));
 
     // decode vorbis file
     short *audio;
