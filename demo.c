@@ -1,6 +1,7 @@
 #include "demo.h"
 #include <SDL.h>
 #include <GL/gl.h>
+#include <unistd.h>
 
 // constants for rocket sync
 static const double BPM = 120; // beats per minute
@@ -52,10 +53,9 @@ demo_t *demo_init(player_t *player, int width, int height) {
 
 #ifndef SYNC_PLAYER
     // connect rocket
-    if (sync_tcp_connect(demo->rocket, "localhost", SYNC_DEFAULT_PORT)) {
-        fprintf(stderr, "sync_tcp_connect failed\n");
-        demo_free(demo);
-        return NULL;
+    while (sync_tcp_connect(demo->rocket, "localhost", SYNC_DEFAULT_PORT)) {
+        printf("Waiting for Rocket editor...\n");
+        sleep(2);
     }
 #endif
 
