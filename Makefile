@@ -3,9 +3,9 @@ TARGET=demo
 CC=gcc
 PREFIX=release
 PKGS=sdl2 gl
-CFLAGS+=$(shell pkg-config --cflags $(PKGS)) -Ilib/stb -Ilib/rocket/lib -DGL_GLEXT_PROTOTYPES
-LFLAGS+=-Llib/rocket/lib
-LDLIBS+=$(shell pkg-config --libs $(PKGS)) -lm
+CFLAGS+=$(shell pkg-config --cflags $(PKGS)) -Ilib/stb -Ilib/rocket/lib -Ilib/gl-matrix.c -DGL_GLEXT_PROTOTYPES
+LFLAGS+=-Llib/rocket/lib -Llib/gl-matrix.c
+LDLIBS+=$(shell pkg-config --libs $(PKGS)) -lm -lgl-matrix
 SOURCES=main.c player.c demo.c gl_util.c read_file.c
 OBJS=$(patsubst %.c,%.o,$(SOURCES))
 
@@ -18,6 +18,7 @@ debug:CFLAGS+=-g -DDEBUG
 # link target
 $(TARGET): $(OBJS)
 	cd lib/rocket; make lib/librocket.a lib/librocket-player.a
+	cd lib/gl-matrix.c; make
 	$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LFLAGS) $(LDLIBS)
 
 # compile target

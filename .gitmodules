@@ -4,3 +4,6 @@
 [submodule "lib/rocket"]
 	path = lib/rocket
 	url = https://github.com/rocket/rocket
+[submodule "lib/gl-matrix.c"]
+	path = lib/gl-matrix.c
+	url = https://github.com/coreh/gl-matrix.c
