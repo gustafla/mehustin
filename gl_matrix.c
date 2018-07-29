@@ -2,6 +2,23 @@
 #include <math.h>
 #include <stdlib.h>
 
+GLfloat vec3_length(const GLfloat *vec) {
+    GLfloat x = vec[0], y = vec[1], z = vec[2];
+    return sqrt(x * x + y * y + z * z);
+}
+
+void vec3_normalize(GLfloat *vec) {
+    GLfloat len = vec3_length(vec);
+    vec[0] /= len; vec[1] /= len; vec[2] /= len;
+}
+
+void vec3_cross(GLfloat *vec, const GLfloat *vec2) {
+    GLfloat x = vec[1] * vec2[2] - vec[2] * vec2[1];
+    GLfloat y = vec[2] * vec2[0] - vec[0] * vec2[2];
+    GLfloat z = vec[0] * vec2[1] - vec[1] * vec2[0];
+    vec[0] = x; vec[1] = y; vec[2] = z;
+}
+
 void matrix_init(GLfloat **matrix) {
     *matrix = (GLfloat*)calloc(16, sizeof(GLfloat));
 }
@@ -132,4 +149,31 @@ void matrix_euler_rotation_translation(GLfloat roll, GLfloat pitch, GLfloat yaw,
     GLfloat quat[4];
     quat_euler(roll, pitch, yaw, quat);
     matrix_rotation_translation(quat, vec, matrix);
+}
+
+void matrix_look_at(const GLfloat* from, const GLfloat* to, GLfloat* matrix) {
+    const GLfloat arbitrary[] = {0, 1, 0};
+    GLfloat forward[] = {from[0] - to[0], from[1] - to[1], from[2] - to[2]};
+    vec3_normalize(forward);
+    GLfloat right[] = {arbitrary[0], arbitrary[1], arbitrary[2]};
+    vec3_cross(right, forward);
+    GLfloat up[] = {forward[0], forward[1], forward[2]};
+    vec3_cross(up, right);
+
+    matrix[0] = right[0];
+    matrix[1] = right[1];
+    matrix[2] = right[2];
+    matrix[3] = 0;
+    matrix[4] = up[0];
+    matrix[5] = up[1];
+    matrix[6] = up[2];
+    matrix[7] = 0;
+    matrix[8] = forward[0];
+    matrix[9] = forward[1];
+    matrix[10] = forward[2];
+    matrix[11] = 0;
+    matrix[12] = from[0];
+    matrix[13] = from[1];
+    matrix[14] = from[2];
+    matrix[15] = 0;
 }
