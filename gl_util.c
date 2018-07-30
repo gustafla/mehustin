@@ -3,6 +3,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+GLuint gen_vao(const vertex_attrib_pointer_t **vaparam) {
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    const vertex_attrib_pointer_t *params;
+    while ((params = *vaparam++)) {
+        glVertexAttribPointer(params->index, params->size, params->type,
+                params->normalized, params->stride, params->pointer);
+        glEnableVertexAttribArray(params->index);
+    }
+
+    // TODO needed?
+    glBindVertexArray(0);
+
+    return vao;
+}
+
 GLuint compile_shader(GLenum type, char *shader_file_path) {
     char *source;
     if (!read_file_to_str(&source, shader_file_path)) {
