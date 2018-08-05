@@ -1,6 +1,6 @@
 # build and install settings
-PREFIX=release
-BASE=.
+PREFIX?=release
+BASE?=.
 CC=gcc
 PKGS=sdl2 gl
 PKGS_MODULE=gl
