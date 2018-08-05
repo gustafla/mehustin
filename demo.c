@@ -126,7 +126,7 @@ int demo_reload(demo_t *demo) {
     }
 
     // load scene module
-    demo->module = dlopen("scene.so", RTLD_LAZY);
+    demo->module = dlopen("./scene.so", RTLD_LAZY);
     if (!demo->module) {
         fputs(dlerror(), stderr);
         return EXIT_FAILURE;
@@ -141,7 +141,9 @@ int demo_reload(demo_t *demo) {
     if (!demo->scene_render) goto module_error;
 
     // init scene
-    demo->scene_init(demo);
+    if (demo->scene_init(demo)) {
+        return EXIT_FAILURE;
+    }
 
     puts("Scene module loaded\n");
     return EXIT_SUCCESS;
