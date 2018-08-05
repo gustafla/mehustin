@@ -94,6 +94,9 @@ module_error:
 
 void demo_free(demo_t *demo) {
     if (demo->module) {
+        if (demo->scene_free) {
+            demo->scene_free();
+        }
         dlclose(demo->module);
     }
     if (demo->rocket) {
