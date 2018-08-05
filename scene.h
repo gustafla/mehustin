@@ -3,7 +3,7 @@
 
 struct demo_t;
 
-int scene_init(demo_t*);
+int scene_init(const demo_t*);
 void scene_deinit();
 void scene_render();
 

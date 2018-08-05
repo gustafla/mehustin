@@ -4,7 +4,7 @@
 
 static demo_t* demo;
 
-int scene_init(demo_t* p_demo) {
+int scene_init(const demo_t *p_demo) {
     demo = p_demo;
     return EXIT_SUCCESS;
 }
