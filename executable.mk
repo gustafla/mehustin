@@ -13,8 +13,8 @@ include common.mk
 .PHONY: install
 
 install: $(TARGET) LICENSE demo.sh
-	install -d $(PREFIX)/bin
-	install -d $(PREFIX)/src
+	mkdir -p $(PREFIX)/bin || :
+	mkdir -p $(PREFIX)/src || :
 	cp $(TARGET) $(PREFIX)/bin/
 	cp LICENSE $(PREFIX)/
 	cp demo.sh $(PREFIX)/
