@@ -15,3 +15,8 @@ include common.mk
 
 install: $(TARGET)
 	cp $(TARGET) $(PREFIX)/bin/
+	cp *.vert $(PREFIX)/bin/ || :
+	cp *.frag $(PREFIX)/bin/ || :
+	cp *.track $(PREFIX)/bin/ || :
+	cp music.ogg $(PREFIX)/bin/ || :
+	cp README.md $(PREFIX)/ || :

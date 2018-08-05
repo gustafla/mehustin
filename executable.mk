@@ -16,11 +16,6 @@ install: $(TARGET) LICENSE demo.sh
 	install -d $(PREFIX)/bin
 	install -d $(PREFIX)/src
 	cp $(TARGET) $(PREFIX)/bin/
-	cp *.vert $(PREFIX)/bin/ || :
-	cp *.frag $(PREFIX)/bin/ || :
-	cp *.track $(PREFIX)/bin/ || :
-	cp music.ogg $(PREFIX)/bin/ || :
-	cp README.md $(PREFIX)/ || :
 	cp LICENSE $(PREFIX)/
 	cp demo.sh $(PREFIX)/
 	git clone ./ $(PREFIX)/src
