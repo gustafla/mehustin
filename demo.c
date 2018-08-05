@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <GL/gl.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 // constants for rocket sync
 static const double BPM = 120; // beats per minute
@@ -44,6 +45,18 @@ demo_t *demo_init(player_t *player, int width, int height) {
     demo_t *demo = calloc(1, sizeof(demo_t));
     if (!demo) return NULL;
 
+    // load scene module
+    demo->module = dlopen("scene.so", RTLD_LAZY);
+    if (!demo->module) goto module_error;
+
+    // load scene api
+    demo->scene_init = dlsym(demo->module, "scene_init");
+    if (!demo->scene_init) goto module_error;
+    demo->scene_free = dlsym(demo->module, "scene_free");
+    if (!demo->scene_free) goto module_error;
+    demo->scene_render = dlsym(demo->module, "scene_render");
+    if (!demo->scene_render) goto module_error;
+
     // init rocket
     demo->rocket = sync_create_device("sync");
     if (!demo->rocket) {
@@ -65,13 +78,24 @@ demo_t *demo_init(player_t *player, int width, int height) {
     demo->height = height;
     glViewport(0, 0, width, height);
 
+    // init scene
+    demo->scene_init(demo);
+
     // start music
     demo->player = player;
     SDL_PauseAudioDevice(player->audio_device, 0);
     return demo;
+
+module_error:
+    fputs(dlerror(), stderr);
+    demo_free(demo);
+    return NULL;
 }
 
 void demo_free(demo_t *demo) {
+    if (demo->module) {
+        dlclose(demo->module);
+    }
     if (demo->rocket) {
 #ifndef SYNC_PLAYER
         // save tracks to librocket-player format
@@ -99,7 +123,7 @@ void demo_render(demo_t *demo) {
     }
 #endif
 
-    // render
+    demo->scene_render();
 }
 
 void demo_reload(demo_t *demo) {
