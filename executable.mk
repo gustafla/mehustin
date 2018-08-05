@@ -3,6 +3,7 @@ include config.mk
 TARGET=demo
 SOURCES=main.c player.c demo.c gl_util.c read_file.c gl_matrix.c
 
+LFLAGS=-rdynamic
 LDLIBS+=-lm -ldl $(shell pkg-config --libs $(PKGS))
 release:LDLIBS+=-lrocket-player
 debug:LDLIBS+=-lrocket

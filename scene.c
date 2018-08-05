@@ -14,5 +14,6 @@ void scene_free() {
 }
 
 void scene_render() {
+    demo_sync_get_value(demo, "test");
     printf("scene_render(). demo@%p\n", demo);
 }
