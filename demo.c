@@ -102,7 +102,7 @@ void demo_render(demo_t *demo) {
     // render
 }
 
-void demo_recompile(demo_t *demo) {
+void demo_reload(demo_t *demo) {
     
 }
 

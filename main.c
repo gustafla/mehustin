@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
             }
 #ifdef DEBUG
             else if (e.key.keysym.sym == SDLK_r) {
-                demo_recompile(demo);
+                demo_reload(demo);
             }
 #endif
         }
