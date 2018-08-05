@@ -45,18 +45,6 @@ demo_t *demo_init(player_t *player, int width, int height) {
     demo_t *demo = calloc(1, sizeof(demo_t));
     if (!demo) return NULL;
 
-    // load scene module
-    demo->module = dlopen("scene.so", RTLD_LAZY);
-    if (!demo->module) goto module_error;
-
-    // load scene api
-    demo->scene_init = dlsym(demo->module, "scene_init");
-    if (!demo->scene_init) goto module_error;
-    demo->scene_free = dlsym(demo->module, "scene_free");
-    if (!demo->scene_free) goto module_error;
-    demo->scene_render = dlsym(demo->module, "scene_render");
-    if (!demo->scene_render) goto module_error;
-
     // init rocket
     demo->rocket = sync_create_device("sync");
     if (!demo->rocket) {
@@ -79,17 +67,16 @@ demo_t *demo_init(player_t *player, int width, int height) {
     glViewport(0, 0, width, height);
 
     // init scene
-    demo->scene_init(demo);
+    if (demo_reload(demo)) {
+        demo_free(demo);
+        return NULL;
+    }
 
     // start music
     demo->player = player;
     SDL_PauseAudioDevice(player->audio_device, 0);
     return demo;
 
-module_error:
-    fputs(dlerror(), stderr);
-    demo_free(demo);
-    return NULL;
 }
 
 void demo_free(demo_t *demo) {
@@ -129,8 +116,40 @@ void demo_render(demo_t *demo) {
     demo->scene_render();
 }
 
-void demo_reload(demo_t *demo) {
-    
+int demo_reload(demo_t *demo) {
+    // clean up if needed
+    if (demo->scene_free) {
+        demo->scene_free();
+    }
+    if (demo->module) {
+        dlclose(demo->module);
+    }
+
+    // load scene module
+    demo->module = dlopen("scene.so", RTLD_LAZY);
+    if (!demo->module) {
+        fputs(dlerror(), stderr);
+        return EXIT_FAILURE;
+    }
+
+    // load scene api
+    demo->scene_init = dlsym(demo->module, "scene_init");
+    if (!demo->scene_init) goto module_error;
+    demo->scene_free = dlsym(demo->module, "scene_free");
+    if (!demo->scene_free) goto module_error;
+    demo->scene_render = dlsym(demo->module, "scene_render");
+    if (!demo->scene_render) goto module_error;
+
+    // init scene
+    demo->scene_init(demo);
+
+    puts("Scene module loaded\n");
+    return EXIT_SUCCESS;
+
+module_error:
+    fputs(dlerror(), stderr);
+    dlclose(demo->module);
+    return EXIT_FAILURE;
 }
 
 double demo_sync_get_value(const demo_t *demo, const char *name) {

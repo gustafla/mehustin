@@ -24,7 +24,7 @@ typedef struct demo_t_ {
 demo_t *demo_init(player_t*, int, int);
 void demo_free(demo_t*);
 void demo_render(demo_t*);
-void demo_reload(demo_t*);
+int demo_reload(demo_t*);
 double demo_sync_get_value(const demo_t*, const char*);
 
 #endif
