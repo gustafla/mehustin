@@ -3,7 +3,9 @@ include config.mk
 TARGET=demo
 SOURCES=main.c player.c demo.c gl_util.c read_file.c gl_matrix.c
 
-LDLIBS+=-ldl
+LDLIBS+=-lm -ldl $(shell pkg-config --libs $(PKGS))
+release:LDLIBS+=-lrocket-player
+debug:LDLIBS+=-lrocket
 
 include common.mk
 

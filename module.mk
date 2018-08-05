@@ -7,6 +7,8 @@ OBJS=$(patsubst %.c,%.o,$(SOURCES))
 CFLAGS+=-fPIC
 LFLAGS+=-shared
 
+LDLIBS+=$(shell pkg-config --libs $(PKGS_MODULE))
+
 include common.mk
 
 .PHONY: install
