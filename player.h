@@ -10,12 +10,13 @@ typedef struct {
 } playback_t;
 
 typedef struct {
+    double row_rate; // visuals sync speed in rows/s
     SDL_AudioDeviceID audio_device;
     SDL_AudioSpec spec;
     playback_t playback;
 } player_t;
 
-player_t *player_init(const char*);
+player_t *player_init(const char*, double, double);
 void player_free(player_t *player);
 
 #endif

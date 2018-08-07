@@ -4,9 +4,9 @@
 #include "demo.h"
 #include <GL/gl.h>
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
     // parse arguments
-    int width = 640, height = 360, srgb = 1;
+    int width = 640, height = 360, bpm = 120, rpb = 8, srgb = 1;
     while (*(++argv)) {
         if (strcmp(*argv, "-w") == 0) {
             if (*(++argv) == NULL) goto arg_error;
@@ -14,6 +14,12 @@ int main(int argc, char **argv) {
         } else if (strcmp(*argv, "-h") == 0) {
             if (*(++argv) == NULL) goto arg_error;
             if ((height = atoi(*argv)) < 1) goto arg_error;
+        } else if (strcmp(*argv, "-b") == 0) {
+            if (*(++argv) == NULL) goto arg_error;
+            if ((bpm = atoi(*argv)) < 1) goto arg_error;
+        } else if (strcmp(*argv, "-r") == 0) {
+            if (*(++argv) == NULL) goto arg_error;
+            if ((rpb = atoi(*argv)) < 1) goto arg_error;
         } else if (strcmp(*argv, "--disable-srgb") == 0) {
             srgb = 0;
         } else goto arg_error;
@@ -26,7 +32,7 @@ int main(int argc, char **argv) {
     }
 
     // decode vorbis music and prepare player
-    player_t *player = player_init("music.ogg");
+    player_t *player = player_init("music.ogg", bpm, rpb);
     if (!player) {
         fprintf(stderr, "Music player failed to initialize\n");
         return EXIT_FAILURE;

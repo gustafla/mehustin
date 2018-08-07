@@ -21,7 +21,7 @@ void callback(void *userdata, Uint8 *stream, int len) {
     playback->pos += len;
 }
 
-player_t *player_init(const char *vorbis_file_path) {
+player_t *player_init(const char *vorbis_file_path, double bpm, double rpb) {
     player_t *player = calloc(1, sizeof(player_t));
     if (!player) return NULL;
 
@@ -58,6 +58,9 @@ player_t *player_init(const char *vorbis_file_path) {
         player_free(player);
         return NULL;
     }
+
+    // set row rate
+    player->row_rate = (bpm / 60.) * rpb;
 
     return player;
 }

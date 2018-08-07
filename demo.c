@@ -4,11 +4,6 @@
 #include <unistd.h>
 #include <dlfcn.h>
 
-// constants for rocket sync
-static const double BPM = 120; // beats per minute
-static const double RPB = 8; // rows per beat
-static const double ROW_RATE = (BPM / 60.) * RPB; // rows per second
-
 // rocket editor sync with music player
 #ifndef SYNC_PLAYER
 static void player_pause(void *d, int flag) {
@@ -19,7 +14,7 @@ static void player_pause(void *d, int flag) {
 static void player_set_row(void *d, int row) {
     player_t *player = (player_t*)d;
     // desired row to byte
-    size_t pos = row / ROW_RATE * player->spec.channels * sizeof(Uint16)
+    size_t pos = row / player->row_rate * player->spec.channels * sizeof(Uint16)
         * player->spec.freq;
     // align byte position to first byte of left sample
     pos -= pos % (player->spec.channels * sizeof(Uint16));
@@ -104,7 +99,7 @@ void demo_render(demo_t *demo) {
     SDL_UnlockAudioDevice(player->audio_device);
     demo->time = byte_at / player->spec.channels / sizeof(Uint16)
         / player->spec.freq;
-    demo->row = demo->time * ROW_RATE;
+    demo->row = demo->time * demo->player->row_rate;
 
 #ifndef SYNC_PLAYER
     // update rocket
