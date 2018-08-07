@@ -1,28 +1,24 @@
 #include <stdlib.h>
+#include <unistd.h>
 #include <SDL.h>
+#include <GL/gl.h>
 #include "player.h"
 #include "demo.h"
-#include <GL/gl.h>
 
 int main(int argc, char *argv[]) {
     // parse arguments
-    int width = 640, height = 360, bpm = 120, rpb = 8, srgb = 1;
-    while (*(++argv)) {
-        if (strcmp(*argv, "-w") == 0) {
-            if (*(++argv) == NULL) goto arg_error;
-            if ((width = atoi(*argv)) < 1) goto arg_error;
-        } else if (strcmp(*argv, "-h") == 0) {
-            if (*(++argv) == NULL) goto arg_error;
-            if ((height = atoi(*argv)) < 1) goto arg_error;
-        } else if (strcmp(*argv, "-b") == 0) {
-            if (*(++argv) == NULL) goto arg_error;
-            if ((bpm = atoi(*argv)) < 1) goto arg_error;
-        } else if (strcmp(*argv, "-r") == 0) {
-            if (*(++argv) == NULL) goto arg_error;
-            if ((rpb = atoi(*argv)) < 1) goto arg_error;
-        } else if (strcmp(*argv, "--disable-srgb") == 0) {
-            srgb = 0;
-        } else goto arg_error;
+    int opt, width = 640, height = 360, srgb = 1, fs = 0, bpm = 120, rpb = 8;
+    while ((opt = getopt(argc, argv, "x:y:b:r:cfw")) != -1) {
+        switch (opt) {
+            case 'x': if ((width = atoi(optarg)) < 1) goto arg_error; break;
+            case 'y': if ((height = atoi(optarg)) < 1) goto arg_error; break;
+            case 'b': if ((bpm = atoi(optarg)) < 1) goto arg_error; break;
+            case 'r': if ((rpb = atoi(optarg)) < 1) goto arg_error; break;
+            case 'c': srgb = 0; break;
+            case 'f': fs = 1; break;
+            case 'w': fs = 0; break;
+            default: return EXIT_FAILURE;
+        }
     }
 
     // start sdl video (+events) and audio
@@ -48,19 +44,13 @@ int main(int argc, char *argv[]) {
     }
 
     // get an opengl window
-    SDL_Window *window = SDL_CreateWindow(
-            "Mehu | Assembly 2018",
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            width, height,
-            SDL_WINDOW_OPENGL
-#ifndef DEBUG
-            | SDL_WINDOW_FULLSCREEN
-#endif
-            );
+    SDL_Window *window = SDL_CreateWindow((optind < argc ? argv[optind] : "-"),
+            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
+            SDL_WINDOW_OPENGL | (fs ? SDL_WINDOW_FULLSCREEN : 0));
     if (!window) {
         fprintf(stderr, "SDL2 failed to initialize a window: %s\n",
                 SDL_GetError());
-        fprintf(stderr, "Try --disable-srgb\n");
+        fprintf(stderr, "Try the -c option\n");
         return EXIT_FAILURE;
     }
 
@@ -115,10 +105,6 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 
 arg_error:
-    if (*argv == NULL) {
-        fprintf(stderr, "Missing extra argument for %s\n", *(--argv));
-    } else {
-        fprintf(stderr, "Bad argument: %s\n", *argv);
-    }
+    fputs("bad value\n", stderr);
     return EXIT_FAILURE;
 }

@@ -18,6 +18,6 @@ install: $(TARGET) LICENSE demo.sh
 	cp $(TARGET) $(PREFIX)/bin/
 	cp LICENSE $(PREFIX)/
 	cp demo.sh $(PREFIX)/
-	git clone ./ $(PREFIX)/src
-	cd $(PREFIX)/src; git remote remove origin
+	-git clone ./ $(PREFIX)/src
+	-cd $(PREFIX)/src; git remote remove origin
 

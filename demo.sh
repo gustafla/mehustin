@@ -1,3 +1,3 @@
 #!/bin/sh
 cd $(dirname "$0")/bin
-./demo -w 1920 -h 1080 "$@"
+./demo -x 1920 -y 1080 -f "$@" -- Mehu
