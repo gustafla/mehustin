@@ -1,3 +1,3 @@
 #!/bin/sh
 cd $(dirname "$0")/bin
-./demo 1280 720
+./demo -w 1920 -h 1080 "$@"

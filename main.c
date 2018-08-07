@@ -2,18 +2,21 @@
 #include <SDL.h>
 #include "player.h"
 #include "demo.h"
+#include <GL/gl.h>
 
-int main(int argc, char *argv[]) {
-    // figure out width and height of window
-    if (argc < 3) {
-        fprintf(stderr, "width and height required as args\n");
-        return EXIT_FAILURE;
-    }
-    int width = atoi(argv[1]);
-    int height = atoi(argv[2]);
-    if (width <= 0 || height <= 0) {
-        fprintf(stderr, "incorrect arguments\n");
-        return EXIT_FAILURE;
+int main(int argc, char **argv) {
+    // parse arguments
+    int width = 640, height = 360, srgb = 1;
+    while (*(++argv)) {
+        if (strcmp(*argv, "-w") == 0) {
+            if (*(++argv) == NULL) goto arg_error;
+            if ((width = atoi(*argv)) < 1) goto arg_error;
+        } else if (strcmp(*argv, "-h") == 0) {
+            if (*(++argv) == NULL) goto arg_error;
+            if ((height = atoi(*argv)) < 1) goto arg_error;
+        } else if (strcmp(*argv, "--disable-srgb") == 0) {
+            srgb = 0;
+        } else goto arg_error;
     }
 
     // start sdl video (+events) and audio
@@ -34,8 +37,11 @@ int main(int argc, char *argv[]) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
             SDL_GL_CONTEXT_PROFILE_CORE);
+    if (srgb) {
+        SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+    }
 
-    // get an opengl capable window
+    // get an opengl window
     SDL_Window *window = SDL_CreateWindow(
             "Mehu | Assembly 2018",
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -46,17 +52,23 @@ int main(int argc, char *argv[]) {
 #endif
             );
     if (!window) {
-        fprintf(stderr, "SDL2 failed to initialize a window %s\n",
+        fprintf(stderr, "SDL2 failed to initialize a window: %s\n",
                 SDL_GetError());
+        fprintf(stderr, "Try --disable-srgb\n");
         return EXIT_FAILURE;
     }
 
-    // get an opengl context
+    // get and enable an opengl context
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     if (!gl_context) {
         fprintf(stderr, "SDL2 failed to create OpenGL context %s\n",
                 SDL_GetError());
         return EXIT_FAILURE;
+    }
+
+    // set sRGB conversion on for sRGB formats
+    if (srgb) {
+        glEnable(GL_FRAMEBUFFER_SRGB);
     }
 
     // connect/init rocket and prepare demo for rendering
@@ -95,4 +107,12 @@ int main(int argc, char *argv[]) {
     player_free(player);
     SDL_Quit();
     return EXIT_SUCCESS;
+
+arg_error:
+    if (*argv == NULL) {
+        fprintf(stderr, "Missing extra argument for %s\n", *(--argv));
+    } else {
+        fprintf(stderr, "Bad argument: %s\n", *argv);
+    }
+    return EXIT_FAILURE;
 }
