@@ -8,15 +8,14 @@
 int main(int argc, char *argv[]) {
     // parse arguments
     int opt, width = 640, height = 360, srgb = 1, fs = 0, bpm = 120, rpb = 8;
-    while ((opt = getopt(argc, argv, "x:y:b:r:cfw")) != -1) {
+    while ((opt = getopt(argc, argv, "w:h:b:r:cf")) != -1) {
         switch (opt) {
-            case 'x': if ((width = atoi(optarg)) < 1) goto arg_error; break;
-            case 'y': if ((height = atoi(optarg)) < 1) goto arg_error; break;
+            case 'w': if ((width = atoi(optarg)) < 1) goto arg_error; break;
+            case 'h': if ((height = atoi(optarg)) < 1) goto arg_error; break;
             case 'b': if ((bpm = atoi(optarg)) < 1) goto arg_error; break;
             case 'r': if ((rpb = atoi(optarg)) < 1) goto arg_error; break;
-            case 'c': srgb = 0; break;
-            case 'f': fs = 1; break;
-            case 'w': fs = 0; break;
+            case 'c': srgb = !srgb; break;
+            case 'f': fs = !fs; break;
             default: return EXIT_FAILURE;
         }
     }
