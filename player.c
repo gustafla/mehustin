@@ -54,7 +54,7 @@ player_t *player_init(const char *vorbis_file_path, double bpm, double rpb) {
     player->audio_device = SDL_OpenAudioDevice(NULL, 0, &desired, &player->spec,
             0);
     if (!player->audio_device) {
-        fprintf(stderr, "Failed to open audio device. %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to open audio device: %s\n", SDL_GetError());
         player_free(player);
         return NULL;
     }

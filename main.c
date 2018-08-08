@@ -23,14 +23,13 @@ int main(int argc, char *argv[]) {
 
     // start sdl video (+events) and audio
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
-        fprintf(stderr, "SDL2 failed to initialize %s\n", SDL_GetError());
+        fprintf(stderr, "SDL2 failed to initialize: %s\n", SDL_GetError());
         return EXIT_FAILURE;
     }
 
     // decode vorbis music and prepare player
     player_t *player = player_init("music.ogg", bpm, rpb);
     if (!player) {
-        fprintf(stderr, "Music player failed to initialize\n");
         return EXIT_FAILURE;
     }
 
@@ -57,7 +56,7 @@ int main(int argc, char *argv[]) {
     // get and enable an opengl context
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     if (!gl_context) {
-        fprintf(stderr, "SDL2 failed to create OpenGL context %s\n",
+        fprintf(stderr, "SDL2 failed to create an OpenGL context: %s\n",
                 SDL_GetError());
         return EXIT_FAILURE;
     }
@@ -105,6 +104,6 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 
 arg_error:
-    fputs("bad value\n", stderr);
+    fprintf(stderr, "bad value\n");
     return EXIT_FAILURE;
 }
