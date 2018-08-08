@@ -17,8 +17,8 @@ typedef struct demo_t_ {
     // scene module variables
     void *module;
     int (*scene_init)(const struct demo_t_*);
-    void (*scene_free)();
-    void (*scene_render)();
+    void (*scene_free)(void);
+    void (*scene_render)(void);
 } demo_t;
 
 demo_t *demo_init(player_t*, int, int);

@@ -9,8 +9,8 @@ int scene_init(const demo_t *a_demo) {
     return EXIT_SUCCESS;
 }
 
-void scene_free() {
+void scene_free(void) {
 }
 
-void scene_render() {
+void scene_render(void) {
 }

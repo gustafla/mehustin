@@ -4,8 +4,8 @@
 struct demo_t;
 
 int scene_init(const demo_t*);
-void scene_free();
-void scene_render();
+void scene_free(void);
+void scene_render(void);
 
 #endif
 

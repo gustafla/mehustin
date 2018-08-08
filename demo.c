@@ -128,11 +128,11 @@ int demo_reload(demo_t *demo) {
     }
 
     // load scene api
-    demo->scene_init = dlsym(demo->module, "scene_init");
+    *(void**)(&demo->scene_init) = dlsym(demo->module, "scene_init");
     if (!demo->scene_init) goto module_error;
-    demo->scene_free = dlsym(demo->module, "scene_free");
+    *(void**)(&demo->scene_free) = dlsym(demo->module, "scene_free");
     if (!demo->scene_free) goto module_error;
-    demo->scene_render = dlsym(demo->module, "scene_render");
+    *(void**)(&demo->scene_render) = dlsym(demo->module, "scene_render");
     if (!demo->scene_render) goto module_error;
 
     // init scene
