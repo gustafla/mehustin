@@ -1,7 +1,7 @@
 include config.mk
 
 TARGET=demo
-SOURCES=main.c player.c demo.c gl_util.c read_file.c gl_matrix.c
+SOURCES=main.c player.c demo.c gl_util.c read_file.c gl_matrix.c obj.c
 
 LFLAGS=-rdynamic -L$(BASE)lib/rocket/lib
 LDLIBS+=-lm -ldl $(shell pkg-config --libs $(PKGS))

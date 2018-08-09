@@ -1,5 +1,5 @@
-#include "read_file.h"
 #include "gl_util.h"
+#include "read_file.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,7 +23,7 @@ GLuint gen_vao(const vertex_attrib_pointer_t **vaparam) {
 
 GLuint compile_shader(GLenum type, char *shader_file_path) {
     char *source;
-    if (!read_file_to_str(&source, shader_file_path)) {
+    if (!read_file_to_str(shader_file_path, &source)) {
         return 0;
     }
 

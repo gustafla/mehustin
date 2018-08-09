@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-size_t read_file_to_str(char**, char*);
+size_t read_file_to_str(const char*, char**);
 
 #endif

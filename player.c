@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include "player.h"
+#include <stdio.h>
 #include "stb_vorbis.c"
 
 int min(int a, int b) {
