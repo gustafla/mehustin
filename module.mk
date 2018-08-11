@@ -1,6 +1,6 @@
 include config.mk
 
-TARGET=scene.so
+TARGET=demo.so
 SOURCES=scene.c
 OBJS=$(patsubst %.c,%.o,$(SOURCES))
 

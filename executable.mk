@@ -1,6 +1,6 @@
 include config.mk
 
-TARGET=demo
+TARGET=mehustin
 SOURCES=main.c player.c demo.c gl_util.c read_file.c gl_matrix.c obj.c vec.c
 
 LFLAGS=-rdynamic -L$(BASE)lib/rocket/lib
