@@ -52,10 +52,10 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
     FILE *file = fopen(obj_file_path, "r");
     if (!file) goto error;
 
-    // Set features to none so far
+    // set features to none so far
     *features = 0;
 
-    // Allocate temp vecs for holding mesh data
+    // allocate temp vecs for holding mesh data
     vec_t *vertices = vec_init(sizeof(GLfloat));
     if (!vertices) goto cleanup_file;
     vec_t *texture_coordinates = vec_init(sizeof(GLfloat));
@@ -70,7 +70,7 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
     size_t vector_lens[] = {VERTEX_COORD_LEN, 0, 0};
     size_t vec_at = 1;
 
-    // read file to vectors
+    // read file to vecs
     char line[LINE_LEN];
     size_t line_number = 0, faces = 0;
     size_t vertex_len = VERTEX_COORD_LEN, indices_in_vertex = 1;
