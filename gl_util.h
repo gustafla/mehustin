@@ -5,6 +5,8 @@
 #include <GL/glext.h>
 
 #define UNIFORM(x) glGetUniformLocation(program, x)
+#define VAP(index, size, stride, pointer) (vertex_attrib_pointer_t)\
+{index, size, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(pointer)}
 
 typedef struct {
     GLuint index;

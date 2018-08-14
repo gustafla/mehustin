@@ -1,7 +1,7 @@
 include config.mk
 
 TARGET=mehustin
-SOURCES=main.c player.c demo.c gl_util.c read_file.c gl_matrix.c obj.c vec.c
+SOURCES=main.c player.c demo.c gl_util.c read_file.c gl_matrix.c obj.c vec.c quad.c
 
 LFLAGS=-rdynamic -L$(BASE)lib/rocket/lib
 LDLIBS+=-lm -ldl $(shell pkg-config --libs $(PKGS))

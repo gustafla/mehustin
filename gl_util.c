@@ -15,7 +15,6 @@ GLuint gen_vao(const vertex_attrib_pointer_t **vaparam) {
         glEnableVertexAttribArray(params->index);
     }
 
-    // TODO needed?
     glBindVertexArray(0);
 
     return vao;
