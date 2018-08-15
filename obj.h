@@ -8,6 +8,6 @@ typedef enum {
     OBJ_TEXTURE_COORDINATES = 0x2
 } obj_features_t;
 
-size_t load_obj_deindexed(const char*, GLfloat**, obj_features_t*);
+size_t load_obj_deindexed(const char*, GLfloat**, obj_features_t*, size_t*);
 
 #endif

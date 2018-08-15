@@ -48,7 +48,7 @@ size_t charcount(const char *str, char c) {
 }
 
 size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
-       obj_features_t *features) {
+       obj_features_t *features, size_t *vertex_size) {
     FILE *file = fopen(obj_file_path, "r");
     if (!file) goto error;
 
@@ -112,10 +112,16 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
         } else goto unsupported_line;
     }
 
+    if (!faces) {
+        fprintf(stderr, "No faces, can't continue\n");
+        goto cleanup_indices;
+    }
+
     // allocate *mesh
     size_t mesh_len = vertex_len * VERTS_IN_FACE * faces;
     *mesh = malloc(sizeof(GLfloat) * mesh_len);
     if (!*mesh) goto cleanup_indices;
+    *vertex_size = sizeof(GLfloat) * vertex_len;
 
     // deindex to *mesh
     size_t mesh_pos = 0;
@@ -155,6 +161,6 @@ cleanup_vertices:
 cleanup_file:
     fclose(file);
 error:
-    fprintf(stderr, "Failed to load obj file: %s\n", obj_file_path);
+    fprintf(stderr, "Failed to load %s\n", obj_file_path);
     return 0;
 }
