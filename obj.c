@@ -14,7 +14,7 @@
 
 #define VERTS_IN_FACE 3
 
-void parse_vector(vec_t *vec, char *str, size_t n) {
+static void parse_vector(vec_t *vec, char *str, size_t n) {
     str += 2; // skip "v*" from beginning of line
     for (size_t i=0; i<n; i++) {
         GLfloat f = strtof(str, &str);
@@ -22,7 +22,7 @@ void parse_vector(vec_t *vec, char *str, size_t n) {
     }
 }
 
-size_t parse_face(vec_t *vec, char *str, size_t n) {
+static size_t parse_face(vec_t *vec, char *str, size_t n) {
     char *token = strtok(str, " /"); // init and skip first token which is "f"
     while ((token = strtok(NULL, " /"))) {
         if (!n) {
@@ -39,7 +39,7 @@ size_t parse_face(vec_t *vec, char *str, size_t n) {
     return n;
 }
 
-size_t charcount(const char *str, char c) {
+static size_t charcount(const char *str, char c) {
     size_t count = 0;
     while (*(str++)) {
         if (*str == c) count++;

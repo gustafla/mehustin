@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include "stb_vorbis.c"
 
-int min(int a, int b) {
+static int min(int a, int b) {
     if (a < b) return a;
     return b;
 }
 
-void callback(void *userdata, Uint8 *stream, int len) {
+static void callback(void *userdata, Uint8 *stream, int len) {
     playback_t *playback = (playback_t*)userdata;
     // play silence if end is reached
     memset(stream, 0, len);
