@@ -20,18 +20,19 @@ mesh_t *mesh_init_from_obj_file(const char *obj_file_path) {
     glGenBuffers(1, &mesh->array_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->array_buffer);
     glBufferData(GL_ARRAY_BUFFER, v_size * mesh->count, data, GL_STATIC_DRAW);
+
     // vao
-    size_t i = 1, offset = 3;
+    size_t i=1, offset = 3;
     const vertex_attrib_pointer_t *params[] = {
         &VAP(0, 3, v_size, 0), NULL, NULL, NULL
     };
     if (features & OBJ_TEXTURE_COORDINATES) {
-        params[i] = &VAP(i, 2, v_size, offset * sizeof(GLfloat));
-        i++;
+        params[i] = &VAP(1, 2, v_size, offset * sizeof(GLfloat));
         offset += 2;
+        i++;
     }
     if (features & OBJ_NORMALS) {
-        params[i] = &VAP(i, 3, v_size, offset * sizeof(GLfloat));
+        params[i] = &VAP(2, 3, v_size, offset * sizeof(GLfloat));
     }
     mesh->vao = gen_vao(params);
 

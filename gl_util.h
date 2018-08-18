@@ -8,6 +8,8 @@
 #define VAP(index, size, stride, pointer) (vertex_attrib_pointer_t)\
 {index, size, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(pointer)}
 
+void print_errors(void);
+
 typedef struct {
     GLuint index;
     GLint size;

@@ -1,6 +1,6 @@
 #include "demo.h"
+#include "gl_util.h"
 #include <SDL.h>
-#include <GL/gl.h>
 #include <unistd.h>
 #include <dlfcn.h>
 
@@ -92,6 +92,11 @@ void demo_free(demo_t *demo) {
 }
 
 void demo_render(demo_t *demo) {
+#ifdef DEBUG
+    // check opengl errors
+    print_errors();
+#endif
+
     // get time from player and convert to rocket row
     player_t *player = demo->player;
     SDL_LockAudioDevice(player->audio_device);

@@ -3,6 +3,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void print_errors(void) {
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        switch(err) {
+            case GL_INVALID_ENUM:
+                fprintf(stderr, "GL_INVALID_ENUM\n");
+                break;
+            case GL_INVALID_VALUE:
+                fprintf(stderr, "GL_INVALID_VALUE\n");
+                break;
+            case GL_INVALID_OPERATION:
+                fprintf(stderr, "GL_INVALID_OPERATION\n");
+                break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                fprintf(stderr, "GL_INVALID_FRAMEBUFFER_OPERATION\n");
+                break;
+            case GL_OUT_OF_MEMORY:
+                fprintf(stderr, "GL_OUT_OF_MEMORY\n");
+                break;
+            default: fprintf(stderr, "Unknown OpenGL error\n"); break;
+        }
+    }
+}
+
 GLuint gen_vao(const vertex_attrib_pointer_t **vaparam) {
     GLuint vao;
     glGenVertexArrays(1, &vao);
