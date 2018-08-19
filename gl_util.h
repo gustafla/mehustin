@@ -36,4 +36,16 @@ GLuint compile_shader(GLenum, char*);
 // - fragment shader path
 GLuint link_program(char*, char*);
 
+typedef struct {
+    GLenum target;
+    GLint level;
+    GLint internal_format;
+    GLenum format;
+    GLenum type;
+    const GLvoid *data;
+} tex_image_2d_t;
+
+GLuint *gen_textures(GLsizei width, GLsizei height, const tex_image_2d_t **args,
+        size_t *count);
+
 #endif
