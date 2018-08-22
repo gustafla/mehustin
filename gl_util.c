@@ -112,21 +112,17 @@ GLuint link_program(char *vertex_file_path, char *fragment_file_path) {
 }
 
 GLuint *gen_textures(GLsizei width, GLsizei height, const tex_image_2d_t **args,
-        size_t *count) {
-    for (*count=0; args[*count]; (*count)++);
-
+        size_t count) {
     GLuint *textures;
-    textures = calloc(*count, sizeof(GLuint));
+    textures = calloc(count, sizeof(GLuint));
     if (!textures) return NULL;
-    glGenTextures(*count, textures);
+    glGenTextures(count, textures);
 
-    for (size_t i=0; i < *count; i++) {
+    for (size_t i=0; i < count; i++) {
         glBindTexture(args[i]->target, textures[i]);
         glTexImage2D(args[i]->target, args[i]->level, args[i]->internal_format,
                 width, height, 0, args[i]->format, args[i]->type,
                 args[i]->data);
-        glTexParameteri(args[i]->target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(args[i]->target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
 
     return textures;
