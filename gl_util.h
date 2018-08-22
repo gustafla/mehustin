@@ -39,7 +39,7 @@ GLuint link_program(char*, char*);
 typedef struct {
     GLenum target;
     GLint level;
-    GLint internal_format;
+    GLint internalformat;
     GLenum format;
     GLenum type;
     const GLvoid *data;

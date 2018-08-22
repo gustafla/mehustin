@@ -120,7 +120,7 @@ GLuint *gen_textures(GLsizei width, GLsizei height, const tex_image_2d_t **args,
 
     for (size_t i=0; i < count; i++) {
         glBindTexture(args[i]->target, textures[i]);
-        glTexImage2D(args[i]->target, args[i]->level, args[i]->internal_format,
+        glTexImage2D(args[i]->target, args[i]->level, args[i]->internalformat,
                 width, height, 0, args[i]->format, args[i]->type,
                 args[i]->data);
     }
