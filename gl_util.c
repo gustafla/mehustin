@@ -124,16 +124,16 @@ void ufm_mat4(GLuint program, const char *name, mat4 matrix) {
             (GLfloat*)matrix);
 }
 
-GLuint gen_texture(GLsizei width, GLsizei height, tex_image_2d_t args) {
+GLuint gen_texture(GLsizei width, GLsizei height, tex_image_2d_t params) {
     GLuint texture;
     glGenTextures(1, &texture);
 
-    glBindTexture(args.target, texture);
-    glTexImage2D(args.target, args.level, args.internalformat, width, height,
-            0, args.format, args.type, args.data);
-    glTexParameteri(args.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(args.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(args.target, 0);
+    glBindTexture(params.target, texture);
+    glTexImage2D(params.target, params.level, params.internalformat,
+            width, height, 0, params.format, params.type, params.data);
+    glTexParameteri(params.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(params.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(params.target, 0);
 
     return texture;
 }
