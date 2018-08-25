@@ -50,7 +50,6 @@ typedef struct {
     const GLvoid *data;
 } tex_image_2d_t;
 
-GLuint *gen_textures(GLsizei width, GLsizei height, const tex_image_2d_t **args,
-        size_t count);
+GLuint gen_texture(GLsizei width, GLsizei height, tex_image_2d_t args);
 
 #endif

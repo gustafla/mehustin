@@ -18,19 +18,24 @@ fbo_t *fbo_init(GLsizei width, GLsizei height, const tex_image_2d_t **params) {
     // count needed textures
     for (fbo->textures_len=0; params[fbo->textures_len]; fbo->textures_len++);
 
-    // init textures
-    fbo->textures = gen_textures(width, height, params, fbo->textures_len);
+    // allocate textures
+    fbo->textures = calloc(fbo->textures_len, sizeof(GLuint));
     if (!fbo->textures) goto cleanup_fbo;
 
-    // attach textures
     size_t color_att = 0;
     for (size_t i = 0; i < fbo->textures_len; i++) {
+        // init
+        fbo->textures[i] = gen_texture(width, height, *params[i]);
+
+        // figure out attachment
         GLuint att = ATTACHMENTS[color_att];
         switch (params[i]->format) {
             case GL_DEPTH_STENCIL:   att = GL_DEPTH_STENCIL_ATTACHMENT; break;
             case GL_DEPTH_COMPONENT: att = GL_DEPTH_ATTACHMENT; break;
             default: color_att++; break;
         }
+
+        // attach
         glFramebufferTexture2D(GL_FRAMEBUFFER, att, params[i]->target,
                 fbo->textures[i], params[i]->level);
     }

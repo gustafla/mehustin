@@ -124,22 +124,16 @@ void ufm_mat4(GLuint program, const char *name, mat4 matrix) {
             (GLfloat*)matrix);
 }
 
-GLuint *gen_textures(GLsizei width, GLsizei height, const tex_image_2d_t **args,
-        size_t count) {
-    GLuint *textures;
-    textures = calloc(count, sizeof(GLuint));
-    if (!textures) return NULL;
-    glGenTextures(count, textures);
+GLuint gen_texture(GLsizei width, GLsizei height, tex_image_2d_t args) {
+    GLuint texture;
+    glGenTextures(1, &texture);
 
-    for (size_t i = 0; i < count; i++) {
-        glBindTexture(args[i]->target, textures[i]);
-        glTexImage2D(args[i]->target, args[i]->level, args[i]->internalformat,
-                width, height, 0, args[i]->format, args[i]->type,
-                args[i]->data);
-        glTexParameteri(args[i]->target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(args[i]->target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(args[i]->target, 0); // TODO needed?
-    }
+    glBindTexture(args.target, texture);
+    glTexImage2D(args.target, args.level, args.internalformat, width, height,
+            0, args.format, args.type, args.data);
+    glTexParameteri(args.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(args.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(args.target, 0);
 
-    return textures;
+    return texture;
 }
