@@ -14,7 +14,7 @@ static GLfloat quad[] = {
      1,  1, 0, 1, 1
 };
 
-void quad_render(GLuint program) {
+void quad_render(void) {
     if (!initialized) {
         // buffer
         glGenBuffers(1, &buffer);
@@ -30,11 +30,6 @@ void quad_render(GLuint program) {
         initialized = 1;
     }
 
-    glUseProgram(program);
-    glUniform1i(UNIFORM("texture_0"), 0);
-    glUniform1i(UNIFORM("texture_1"), 1);
-    glUniform1i(UNIFORM("texture_2"), 2);
-    glUniform1i(UNIFORM("texture_3"), 3);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);

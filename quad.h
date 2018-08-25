@@ -3,6 +3,6 @@
 
 #include <GL/gl.h>
 
-void quad_render(GLuint program);
+void quad_render(void);
 
 #endif

@@ -3,8 +3,9 @@
 
 #include <GL/gl.h>
 #include <GL/glext.h>
+#include "cglm/cglm.h"
 
-#define UNIFORM(x) glGetUniformLocation(program, x)
+#define UFM(program, x) glGetUniformLocation(program, x)
 #define VAP(index, size, stride, pointer) (vertex_attrib_pointer_t)\
 {index, size, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(pointer)}
 
@@ -35,6 +36,10 @@ GLuint compile_shader(GLenum, char*);
 // - vertex shader path
 // - fragment shader path
 GLuint link_program(char*, char*);
+
+void ufm_float(GLuint program, const char *name, float value);
+void ufm_int(GLuint program, const char *name, int value);
+void ufm_mat4(GLuint program, const char *name, mat4 matrix);
 
 typedef struct {
     GLenum target;

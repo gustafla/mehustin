@@ -10,19 +10,11 @@ typedef struct {
     GLuint fbo;
     GLuint *textures;
     size_t textures_len;
-    GLuint *rbos;
-    size_t rbos_len;
 } fbo_t;
 
-typedef struct {
-    GLenum target;
-    GLenum attachment;
-    GLenum internalformat;
-} rbo_binding_format_t;
-
-fbo_t *fbo_init(GLsizei width, GLsizei height,
-        const tex_image_2d_t **texture_params,
-        const rbo_binding_format_t **rbo_params);
+fbo_t *fbo_init(GLsizei width, GLsizei height, const tex_image_2d_t **params);
 void fbo_free(fbo_t *fbo);
+void fbo_bind(fbo_t *fbo);
+void fbo_bind_textures(fbo_t *fbo);
 
 #endif

@@ -8,9 +8,7 @@ static const GLuint ATTACHMENTS[] = {
     GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7
 };
 
-fbo_t *fbo_init(GLsizei width, GLsizei height,
-        const tex_image_2d_t **texture_params,
-        const rbo_binding_format_t **rbo_params) {
+fbo_t *fbo_init(GLsizei width, GLsizei height, const tex_image_2d_t **params) {
     fbo_t *fbo = calloc(1, sizeof(fbo_t));
     if (!fbo) goto error;
 
@@ -18,51 +16,39 @@ fbo_t *fbo_init(GLsizei width, GLsizei height,
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
 
     // count needed textures
-    for (fbo->textures_len=0; texture_params[fbo->textures_len];
-            fbo->textures_len++);
+    for (fbo->textures_len=0; params[fbo->textures_len]; fbo->textures_len++);
 
     // init textures
-    fbo->textures = gen_textures(width, height, texture_params,
-            fbo->textures_len);
+    fbo->textures = gen_textures(width, height, params, fbo->textures_len);
     if (!fbo->textures) goto cleanup_fbo;
 
     // attach textures
+    size_t color_att = 0;
     for (size_t i = 0; i < fbo->textures_len; i++) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, ATTACHMENTS[i],
-                texture_params[i]->target, fbo->textures[i],
-                texture_params[i]->level);
-    }
-
-    // count needed rbos
-    for (fbo->rbos_len=0; rbo_params[fbo->rbos_len]; fbo->rbos_len++);
-
-    // allocate rbo handles
-    fbo->rbos = calloc(fbo->rbos_len, sizeof(GLuint));
-    if (!fbo->rbos) goto cleanup_texture;
-
-    // generate and attach rbos
-    glGenRenderbuffers(fbo->rbos_len, fbo->rbos);
-    for (size_t i = 0; i < fbo->rbos_len; i++) {
-        glBindRenderbuffer(GL_RENDERBUFFER, fbo->rbos[i]);
-        glRenderbufferStorage(GL_RENDERBUFFER, rbo_params[i]->internalformat,
-                width, height);
-        glFramebufferRenderbuffer(rbo_params[i]->target,
-                rbo_params[i]->attachment, GL_RENDERBUFFER, fbo->rbos[i]);
+        GLuint att = ATTACHMENTS[color_att];
+        switch (params[i]->format) {
+            case GL_DEPTH_STENCIL:   att = GL_DEPTH_STENCIL_ATTACHMENT; break;
+            case GL_DEPTH_COMPONENT: att = GL_DEPTH_ATTACHMENT; break;
+            default: color_att++; break;
+        }
+        glFramebufferTexture2D(GL_FRAMEBUFFER, att, params[i]->target,
+                fbo->textures[i], params[i]->level);
     }
 
     // check for completeness
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         fprintf(stderr, "FBO not complete\n");
-        goto cleanup_rbo;
+        goto cleanup_texture;
     }
 
-    // pre-setup multi- color attachment drawing
-    glDrawBuffers(fbo->textures_len, ATTACHMENTS);
+    // pre-setup multi-color attachment drawing
+    glDrawBuffers(color_att, ATTACHMENTS);
+
+    // unbind
+    fbo_bind(NULL);
 
     return fbo;
 
-cleanup_rbo:
-    glDeleteRenderbuffers(fbo->rbos_len, fbo->rbos);
 cleanup_texture:
     glDeleteTextures(fbo->textures_len, fbo->textures);
 cleanup_fbo:
@@ -75,7 +61,21 @@ error:
 void fbo_free(fbo_t *fbo) {
     if (fbo) {
         glDeleteTextures(fbo->textures_len, fbo->textures);
-        glDeleteRenderbuffers(fbo->rbos_len, fbo->rbos);
         free(fbo);
+    }
+}
+
+void fbo_bind(fbo_t *fbo) {
+    if (!fbo) {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+    }
+}
+
+void fbo_bind_textures(fbo_t *fbo) {
+    for (size_t i=0; i < fbo->textures_len; i++) {
+        glActiveTexture(GL_TEXTURE0+i);
+        glBindTexture(GL_TEXTURE_2D, fbo->textures[i]);
     }
 }
