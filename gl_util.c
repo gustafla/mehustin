@@ -137,3 +137,8 @@ GLuint gen_texture(GLsizei width, GLsizei height, tex_image_2d_t params) {
 
     return texture;
 }
+
+void bind_texture(GLuint texture, GLenum target, size_t i) {
+    glActiveTexture(GL_TEXTURE0 + i);
+    glBindTexture(target, texture);
+}

@@ -8,6 +8,8 @@
 #define UFM(program, x) glGetUniformLocation(program, x)
 #define VAP(index, size, stride, pointer) (vertex_attrib_pointer_t)\
 {index, size, GL_FLOAT, GL_FALSE, stride, (const GLvoid*)(pointer)}
+#define TEX_FORMAT(internal_format, format) (tex_image_2d_t)\
+{GL_TEXTURE_2D, 0, internal_format, format, GL_UNSIGNED_BYTE, NULL}
 
 void print_errors(void);
 
@@ -51,5 +53,6 @@ typedef struct {
 } tex_image_2d_t;
 
 GLuint gen_texture(GLsizei width, GLsizei height, tex_image_2d_t params);
+void bind_texture(GLuint texture, GLenum target, size_t i);
 
 #endif

@@ -5,6 +5,7 @@ release/
 *.track
 *.ogg
 *.png
+*.obj
 *.rocket
 *.frag
 *.vert
