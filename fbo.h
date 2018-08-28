@@ -10,6 +10,7 @@ typedef struct {
 } fbo_t;
 
 fbo_t *fbo_init(GLsizei width, GLsizei height, const tex_image_2d_t **params);
+GLuint fbo_free_keeptexture(fbo_t *fbo);
 void fbo_free(fbo_t *fbo);
 void fbo_bind(fbo_t *fbo);
 void fbo_bind_textures(fbo_t *fbo);

@@ -63,10 +63,25 @@ error:
     return NULL;
 }
 
-void fbo_free(fbo_t *fbo) {
+GLuint fbo_free_keeptexture(fbo_t *fbo) {
+    GLuint needed_texture = 0;
     if (fbo) {
-        glDeleteTextures(fbo->textures_len, fbo->textures);
+        if (fbo->textures_len) {
+            if (fbo->textures_len > 1) {
+                glDeleteTextures(fbo->textures_len - 1, fbo->textures + 1);
+            }
+            needed_texture = fbo->textures[0];
+            free(fbo->textures);
+        }
         free(fbo);
+    }
+    return needed_texture;
+}
+
+void fbo_free(fbo_t *fbo) {
+    GLuint leftover = fbo_free_keeptexture(fbo);
+    if (leftover) {
+        glDeleteTextures(1, &leftover);
     }
 }
 
