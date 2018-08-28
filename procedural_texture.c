@@ -14,12 +14,12 @@ GLuint texture_render(GLsizei w, GLsizei h, char *fragment_path,
 
     const tex_image_2d_t *formats[] = {&format, NULL};
     fbo_t *fbo = fbo_init(w, h, formats);
-    if (!fbo) return EXIT_FAILURE;
+    if (!fbo) return 0;
 
     GLuint program = link_program("vertex.vert", fragment_path);
     if (!program) {
         fbo_free(fbo);
-        return EXIT_FAILURE;
+        return 0;
     }
     ufm_mat4(program, "model", identity);
     ufm_mat4(program, "view", identity);
