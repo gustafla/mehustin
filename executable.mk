@@ -1,7 +1,7 @@
 include config.mk
 
 TARGET=mehustin
-SOURCES=main.c player.c demo.c gl_util.c read_file.c obj.c vec.c quad.c mesh.c fbo.c procedural_texture.c
+SOURCES=$(wildcard src/base/*.c)
 
 LFLAGS=-rdynamic -L$(BASE)/lib/rocket/lib
 LDLIBS+=-lm -ldl $(shell pkg-config --libs $(PKGS))

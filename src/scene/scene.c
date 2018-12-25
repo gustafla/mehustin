@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "demo.h"
+#include "src/base/demo.h"
 
 static const demo_t* demo;
 

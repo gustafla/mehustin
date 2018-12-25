@@ -1,7 +1,7 @@
 include config.mk
 
 TARGET=demo.so
-SOURCES=scene.c
+SOURCES=$(wildcard src/scene/*.c)
 OBJS=$(patsubst %.c,%.o,$(SOURCES))
 
 CFLAGS+=-fPIC
