@@ -4,9 +4,9 @@
 #include "gl_util.h"
 
 typedef struct {
-    GLuint fbo;
-    GLuint *textures;
-    size_t textures_len;
+	GLuint fbo;
+	GLuint *textures;
+	size_t textures_len;
 } fbo_t;
 
 fbo_t *fbo_init(GLsizei width, GLsizei height, const tex_image_2d_t **params);

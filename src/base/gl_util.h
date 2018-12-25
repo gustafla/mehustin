@@ -14,12 +14,12 @@
 void print_errors(void);
 
 typedef struct {
-    GLuint index;
-    GLint size;
-    GLenum type;
-    GLboolean normalized;
-    GLsizei stride;
-    const GLvoid *pointer;
+	GLuint index;
+	GLint size;
+	GLenum type;
+	GLboolean normalized;
+	GLsizei stride;
+	const GLvoid *pointer;
 } vertex_attrib_pointer_t;
 
 // generate a vao
@@ -44,12 +44,12 @@ void ufm_int(GLuint program, const char *name, int value);
 void ufm_mat4(GLuint program, const char *name, mat4 matrix);
 
 typedef struct {
-    GLenum target;
-    GLint level;
-    GLint internalformat;
-    GLenum format;
-    GLenum type;
-    const GLvoid *data;
+	GLenum target;
+	GLint level;
+	GLint internalformat;
+	GLenum format;
+	GLenum type;
+	const GLvoid *data;
 } tex_image_2d_t;
 
 GLuint gen_texture(GLsizei width, GLsizei height, tex_image_2d_t params);

@@ -6,10 +6,10 @@
 #define VEC_GET(vec, type, index) (((type*)vec->buffer)[index])
 
 typedef struct {
-    char *buffer;
-    size_t element_size;
-    size_t use;
-    size_t capacity;
+	char *buffer;
+	size_t element_size;
+	size_t use;
+	size_t capacity;
 } vec_t;
 
 vec_t *vec_init(size_t element_size);

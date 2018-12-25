@@ -4,9 +4,9 @@
 #include <GL/gl.h>
 
 typedef struct {
-    GLuint array_buffer;
-    GLuint vao;
-    size_t count;
+	GLuint array_buffer;
+	GLuint vao;
+	size_t count;
 } mesh_t;
 
 mesh_t *mesh_init_from_obj_file(const char *obj_file_path);

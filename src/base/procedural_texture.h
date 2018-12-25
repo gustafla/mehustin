@@ -5,6 +5,6 @@
 #include "gl_util.h"
 
 GLuint texture_render(GLsizei w, GLsizei h, char *fragment_path,
-        tex_image_2d_t format);
+		tex_image_2d_t format);
 
 #endif
