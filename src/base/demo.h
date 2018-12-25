@@ -14,11 +14,14 @@ typedef struct demo_t_ {
 	struct sync_device *rocket;
 	int width;
 	int height;
+
 	// scene module variables
+#ifndef DEMO_MONOLITHIC
 	void *module;
 	int (*scene_init)(const struct demo_t_*);
 	void (*scene_free)(void);
 	void (*scene_render)(void);
+#endif
 } demo_t;
 
 demo_t *demo_init(player_t*, int, int);

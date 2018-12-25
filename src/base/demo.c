@@ -2,7 +2,12 @@
 #include "gl_util.h"
 #include <SDL.h>
 #include <unistd.h>
+
+#ifndef DEMO_MONOLITHIC
 #include <dlfcn.h>
+#else
+#include "src/scene/scene.h"
+#endif
 
 // rocket editor sync with music player
 #ifndef SYNC_PLAYER
@@ -75,12 +80,17 @@ demo_t *demo_init(player_t *player, int width, int height) {
 }
 
 void demo_free(demo_t *demo) {
+#ifndef DEMO_MONOLITHIC
 	if (demo->module) {
 		if (demo->scene_free) {
 			demo->scene_free();
 		}
 		dlclose(demo->module);
 	}
+#else
+	scene_free();
+#endif
+
 	if (demo->rocket) {
 #ifndef SYNC_PLAYER
 		// save tracks to librocket-player format
@@ -113,10 +123,15 @@ void demo_render(demo_t *demo) {
 	}
 #endif
 
+#ifndef DEMO_MONOLITHIC
 	demo->scene_render();
+#else
+	scene_render();
+#endif
 }
 
 int demo_reload(demo_t *demo) {
+#ifndef DEMO_MONOLITHIC
 	// clean up if needed
 	if (demo->scene_free) {
 		demo->scene_free();
@@ -146,12 +161,19 @@ int demo_reload(demo_t *demo) {
 	}
 
 	printf("Scene module loaded\n");
+#else
+	scene_free();
+	scene_init(demo);
+#endif
+
 	return EXIT_SUCCESS;
 
+#ifndef DEMO_MONOLITHIC
 module_error:
 	fprintf(stderr, "%s\n", dlerror());
 	dlclose(demo->module);
 	return EXIT_FAILURE;
+#endif
 }
 
 double demo_sync_get_value(const demo_t *demo, const char *name) {

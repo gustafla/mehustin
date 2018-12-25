@@ -7,3 +7,5 @@ debug release clean install:
 	make -f executable.mk $(MAKECMDGOALS)
 	make -f module.mk $(MAKECMDGOALS)
 
+monolithic:
+	make -f monolithic.mk release
