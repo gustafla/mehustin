@@ -1,7 +1,7 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <GL/gl.h>
+#include <GLES2/gl2.h>
 
 typedef struct {
 	GLuint array_buffer;

@@ -1,8 +1,8 @@
 #ifndef GL_UTIL_H
 #define GL_UTIL_H
 
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #include "cglm/cglm.h"
 
 #define UFM(program, x) glGetUniformLocation(program, x)
