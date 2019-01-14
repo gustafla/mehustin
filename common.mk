@@ -1,11 +1,11 @@
-OBJS=$(patsubst %.c,%.o,$(SOURCES))
+OBJS=$(patsubst %.c,%.o,$(SOURCES:src/%=$(BUILDDIR)/%))
 
 # link target
 $(TARGET): $(OBJS)
 	$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LFLAGS) $(LDLIBS)
 
 # compile target
-%.o: %.c
+$(BUILDDIR)/%.o: $(SOURCES)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 .PHONY: clean debug release

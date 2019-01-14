@@ -1,12 +1,16 @@
 include config.mk
 
-TARGET=mehustin
+TARGET:=$(BUILDDIR)/mehustin
 SOURCES=$(wildcard src/base/*.c)
 
 LFLAGS=-rdynamic -L$(BASE)/lib/rocket/lib
 LDLIBS+=-lm -ldl $(shell pkg-config --libs $(PKGS))
-release:LDLIBS+=-lrocket-player
-debug:LDLIBS+=-lrocket
+
+ifeq ($(DEBUG), 1)
+LDLIBS+=-lrocket
+else
+LDLIBS+=-lrocket-player
+endif
 
 include common.mk
 

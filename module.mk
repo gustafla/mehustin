@@ -1,8 +1,7 @@
 include config.mk
 
-TARGET=demo.so
+TARGET=$(BUILDDIR)/demo.so
 SOURCES=$(wildcard src/scene/*.c)
-OBJS=$(patsubst %.c,%.o,$(SOURCES))
 
 CFLAGS+=-fPIC
 LFLAGS+=-shared

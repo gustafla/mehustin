@@ -1,11 +1,11 @@
-.PHONY: libs debug release clean install
+.PHONY: build clean install libs monolithic
+
+build clean install:
+	make -f executable.mk $(MAKECMDGOALS)
+	make -f module.mk $(MAKECMDGOALS)
 
 libs:
 	cd lib/rocket; make lib/librocket.a lib/librocket-player.a
-
-debug release clean install:
-	make -f executable.mk $(MAKECMDGOALS)
-	make -f module.mk $(MAKECMDGOALS)
 
 monolithic:
 	make -f monolithic.mk release
