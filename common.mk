@@ -8,11 +8,7 @@ $(TARGET): $(OBJS)
 $(BUILDDIR)/%.o: $(SOURCES)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-.PHONY: clean debug release
-
-debug: $(TARGET)
-
-release: $(TARGET)
+.PHONY: clean
 
 clean:
 	rm -f $(TARGET) $(OBJS)

@@ -1,16 +1,16 @@
 DEBUG?=1
 
 # debug and release settings
-ifeq ($(DEBUG), 1)
-BUILDDIR:=debug
-CFLAGS:=-Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
-else
+ifeq ($(DEBUG), 0)
 BUILDDIR:=release
 CFLAGS:=-O2 -ffast-math -s -DSYNC_PLAYER
+else
+BUILDDIR:=debug
+CFLAGS:=-Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
 endif
 
 # build and install settings
-PREFIX?=release
+PREFIX?=demo
 BASE?=.
 CC=gcc
 PKGS=sdl2 glesv2
