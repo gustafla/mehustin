@@ -3,12 +3,12 @@ OBJS=$(patsubst %.c,%.o,$(SOURCES:src/%=$(BUILDDIR)/%))
 # link target
 $(TARGET): $(OBJS)
 	@mkdir -p $(@D)
-	$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LFLAGS) $(LDLIBS)
+	@$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LFLAGS) $(LDLIBS)
 
 # compile target
-$(BUILDDIR)/%.o: $(SOURCES)
+$(BUILDDIR)/%.o: src/%.c
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
 
 .PHONY: clean
 
