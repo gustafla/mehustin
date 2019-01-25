@@ -7,14 +7,13 @@
 
 int main(int argc, char *argv[]) {
 	// parse arguments
-	int opt, width = 640, height = 360, srgb = 1, fs = 0, bpm = 120, rpb = 8;
+	int opt, width = 640, height = 360, fs = 0, bpm = 120, rpb = 8;
 	while ((opt = getopt(argc, argv, "w:h:b:r:cf")) != -1) {
 		switch (opt) {
 			case 'w': if ((width = atoi(optarg)) < 1) goto arg_error; break;
 			case 'h': if ((height = atoi(optarg)) < 1) goto arg_error; break;
 			case 'b': if ((bpm = atoi(optarg)) < 1) goto arg_error; break;
 			case 'r': if ((rpb = atoi(optarg)) < 1) goto arg_error; break;
-			case 'c': srgb = !srgb; break;
 			case 'f': fs = !fs; break;
 			default: return EXIT_FAILURE;
 		}
@@ -37,9 +36,6 @@ int main(int argc, char *argv[]) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
 			SDL_GL_CONTEXT_PROFILE_ES);
-	if (srgb) {
-		SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
-	}
 
 	// get an opengl window
 	SDL_Window *window = SDL_CreateWindow((optind < argc ? argv[optind] : "-"),
@@ -58,11 +54,6 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "SDL2 failed to create an OpenGL context: %s\n",
 				SDL_GetError());
 		return EXIT_FAILURE;
-	}
-
-	// set sRGB conversion on for sRGB formats
-	if (srgb) {
-		glEnable(GL_FRAMEBUFFER_SRGB);
 	}
 
 	// connect/init rocket and prepare demo for rendering

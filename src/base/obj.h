@@ -1,7 +1,8 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#include "GLES2/gl2.h"
+#include <stddef.h>
+#include <GLES2/gl2.h>
 
 typedef enum {
 	OBJ_NORMALS = 0x1,

@@ -1,5 +1,5 @@
 #include "demo.h"
-#include "gl_util.h"
+#include <GLES2/gl2.h>
 #include <SDL.h>
 #include <unistd.h>
 
@@ -104,7 +104,15 @@ void demo_free(demo_t *demo) {
 void demo_render(demo_t *demo) {
 #ifdef DEBUG
 	// check opengl errors
-	print_errors();
+	switch (glGetError()) {
+		case GL_NO_ERROR: break;
+		case GL_INVALID_ENUM: fprintf(stderr, "GL_INVALID_ENUM\n"); break;
+		case GL_INVALID_VALUE: fprintf(stderr, "GL_INVALID_VALUE\n"); break;
+		case GL_INVALID_OPERATION: fprintf(stderr, "GL_INVALID_OPERATION\n"); break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION: fprintf(stderr, "GL_INVALID_FRAMEBUFFER_OPERATION\n"); break;
+		case GL_OUT_OF_MEMORY: fprintf(stderr, "GL_OUT_OF_MEMORY\n"); break;
+		default: fprintf(stderr, "Unknown glGetError() return value\n");
+	}
 #endif
 
 	// get time from player and convert to rocket row
