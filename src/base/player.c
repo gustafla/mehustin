@@ -37,7 +37,7 @@ player_t *player_init(const char *vorbis_file_path, double bpm, double rpb) {
 	}
 
 	// cast audio to bytes for playback and compute size in bytes
-	player->playback.data = (Uint8*)audio;
+	player->playback.data = (Uint8*)audio; // char* can point to anything
 	player->playback.bytes = samples * channels * sizeof(short);
 
 	// this spec needed to play the file back
