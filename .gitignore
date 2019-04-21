@@ -1,6 +1,7 @@
 mehustin
 demo
 release/
+debug/
 *.o
 *.so
 *.track
