@@ -3,9 +3,8 @@ include config.mk
 TARGET=$(BUILDDIR)/demo.so
 SOURCES=$(wildcard src/scene/*.c)
 
-CFLAGS+=-fPIC
-LFLAGS+=-shared
-
+CFLAGS+=$(shell pkg-config --cflags $(PKGS_MODULE) $(PKGS_EXECUTABLE)) -fPIC
+LDFLAGS+=-shared
 LDLIBS+=$(shell pkg-config --libs $(PKGS_MODULE))
 
 include common.mk
