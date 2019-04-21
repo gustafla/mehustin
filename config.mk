@@ -3,10 +3,10 @@ DEBUG?=1
 # debug and release settings
 ifeq ($(DEBUG),0)
 BUILDDIR:=release
-CFLAGS:=-O2 -ffast-math -DSYNC_PLAYER
+CFLAGS+=-O2 -ffast-math -DSYNC_PLAYER
 else
 BUILDDIR:=debug
-CFLAGS:=-Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
+CFLAGS+=-Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
 endif
 
 # build and install settings
