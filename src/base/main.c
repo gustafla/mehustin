@@ -6,13 +6,19 @@
 
 int main(int argc, char *argv[]) {
 	// parse arguments
-	int opt, width = 640, height = 360, fs = 0, bpm = 120, rpb = 8;
-	while ((opt = getopt(argc, argv, "w:h:b:r:cf")) != -1) {
+	int opt, width = 640, height = 360, fs = 0, bpm = 120, rpb = 8,
+		gl_major = 2, gl_minor = 0, gl = SDL_GL_CONTEXT_PROFILE_ES;
+	while ((opt = getopt(argc, argv, "w:h:b:r:a:i:ecmf")) != -1) {
 		switch (opt) {
 			case 'w': if ((width = atoi(optarg)) < 1) goto arg_error; break;
 			case 'h': if ((height = atoi(optarg)) < 1) goto arg_error; break;
 			case 'b': if ((bpm = atoi(optarg)) < 1) goto arg_error; break;
 			case 'r': if ((rpb = atoi(optarg)) < 1) goto arg_error; break;
+			case 'a': if ((gl_major = atoi(optarg)) < 1) goto arg_error; break;
+			case 'i': if ((gl_minor = atoi(optarg)) < 0) goto arg_error; break;
+			case 'e': gl = SDL_GL_CONTEXT_PROFILE_ES; break;
+			case 'c': gl = SDL_GL_CONTEXT_PROFILE_CORE; break;
+			case 'm': gl = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY; break;
 			case 'f': fs = !fs; break;
 			default: return EXIT_FAILURE;
 		}
@@ -31,10 +37,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	// opengl attributes
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-			SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, gl);
 
 	// get an opengl window
 	SDL_Window *window = SDL_CreateWindow((optind < argc ? argv[optind] : "-"),
