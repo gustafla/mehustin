@@ -22,9 +22,11 @@ static struct demo_ {
 	// scene module variables
 #ifndef DEMO_MONOLITHIC
 	void *module;
-	int32_t (*scene_init)(int32_t width, int32_t height);
+	// width, height, getval("...")
+	int32_t (*scene_init)(int32_t, int32_t, double (*)(const char*));
 	void (*scene_deinit)(void);
-	void (*scene_render)(double time);
+	// time
+	void (*scene_render)(double);
 #endif
 } demo;
 
@@ -182,7 +184,7 @@ int demo_reload(void) {
 	if (!demo.scene_render) goto module_error;
 
 	// init scene
-	if (demo.scene_init(demo.width, demo.height)) {
+	if (demo.scene_init(demo.width, demo.height, demo_sync_get_value)) {
 		return EXIT_FAILURE;
 	}
 
