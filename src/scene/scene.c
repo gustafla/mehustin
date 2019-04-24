@@ -3,21 +3,27 @@
 #include <stdio.h>
 #include <GLES2/gl2.h>
 
-static double (*get_value)(const char *name);
+typedef struct scene_t_ {
+	double (*get_value)(const char*);
+} scene_t;
 
-int32_t scene_init(int32_t width, int32_t height, double (*getval)(const char*)) {
-	get_value = getval;
-
+void* scene_init(int32_t width, int32_t height, double (*getval)(const char*)) {
 	// set up viewport
 	glViewport(0, 0, width, height);
 
-	return EXIT_SUCCESS;
+	scene_t *scene = malloc(sizeof(scene_t));
+	scene->get_value = getval;
+
+	return scene;
 }
 
-void scene_deinit(void) {
+void scene_deinit(void *data) {
+	free(data);
 }
 
-void scene_render(double time) {
+void scene_render(double time, void *data) {
+	scene_t *scene = data;
+
 #ifdef DEBUG
 	// check opengl errors
 	switch (glGetError()) {
@@ -31,5 +37,5 @@ void scene_render(double time) {
 	}
 #endif
 
-	printf("Value of test is: %f\n", get_value("test"));
+	printf("Value of test is: %f\n", scene->get_value("test"));
 }

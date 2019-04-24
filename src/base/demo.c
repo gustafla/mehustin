@@ -17,15 +17,17 @@ static struct demo_ {
 	struct sync_device *rocket;
 	int width;
 	int height;
+	void *scene_data;
 
 	// scene module variables
 #ifndef DEMO_MONOLITHIC
 	void *module;
 	// width, height, getval("...")
-	int32_t (*scene_init)(int32_t, int32_t, double (*)(const char*));
-	void (*scene_deinit)(void);
-	// time
-	void (*scene_render)(double);
+	void *(*scene_init)(int32_t, int32_t, double (*)(const char*));
+	// data
+	void (*scene_deinit)(void*);
+	// time, data
+	void (*scene_render)(double, void*);
 #endif
 } demo;
 
@@ -99,12 +101,12 @@ void demo_deinit(void) {
 #ifndef DEMO_MONOLITHIC
 	if (demo.module) {
 		if (demo.scene_deinit) {
-			demo.scene_deinit();
+			demo.scene_deinit(demo.scene_data);
 		}
 		dlclose(demo.module);
 	}
 #else
-	scene_deinit();
+	scene_deinit(demo.scene_data);
 #endif
 
 	if (demo.rocket) {
@@ -137,9 +139,9 @@ void demo_render(void) {
 #endif
 
 #ifndef DEMO_MONOLITHIC
-	demo.scene_render(demo.time);
+	demo.scene_render(demo.time, demo.scene_data);
 #else
-	scene_render(demo.time);
+	scene_render(demo.time, demo.scene_data);
 #endif
 }
 
@@ -147,7 +149,7 @@ int demo_reload(void) {
 #ifndef DEMO_MONOLITHIC
 	// clean up if needed
 	if (demo.scene_deinit) {
-		demo.scene_deinit();
+		demo.scene_deinit(demo.scene_data);
 	}
 	if (demo.module) {
 		dlclose(demo.module);
@@ -169,15 +171,18 @@ int demo_reload(void) {
 	if (!demo.scene_render) goto module_error;
 
 	// init scene
-	if (demo.scene_init(demo.width, demo.height, demo_sync_get_value)) {
-		return EXIT_FAILURE;
-	}
+	demo.scene_data = demo.scene_init(demo.width, demo.height, demo_sync_get_value);
 
 	printf("Scene module loaded\n");
 #else
-	scene_deinit();
-	scene_init();
+	scene_deinit(demo.scene_data);
+	demo.scene_data = scene_init(demo.width, demo.height, demo_sync_get_value);
 #endif
+
+	if (!demo.scene_data) {
+		fprintf(stderr, "scene_init returned NULL\n");
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 
