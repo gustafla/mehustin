@@ -1,7 +1,6 @@
 #include "demo.h"
 #include "sync.h"
 #include <stdint.h>
-#include <GLES2/gl2.h>
 #include <SDL.h>
 #include <unistd.h>
 
@@ -79,10 +78,9 @@ int demo_init(player_t *player, int width, int height) {
 	}
 #endif
 
-	// set resolution
+	// store resolution
 	demo.width = width;
 	demo.height = height;
-	glViewport(0, 0, width, height);
 
 	// init scene
 	if (demo_reload()) {
@@ -122,19 +120,6 @@ void demo_deinit(void) {
 }
 
 void demo_render(void) {
-#ifdef DEBUG
-	// check opengl errors
-	switch (glGetError()) {
-		case GL_NO_ERROR: break;
-		case GL_INVALID_ENUM: fprintf(stderr, "GL_INVALID_ENUM\n"); break;
-		case GL_INVALID_VALUE: fprintf(stderr, "GL_INVALID_VALUE\n"); break;
-		case GL_INVALID_OPERATION: fprintf(stderr, "GL_INVALID_OPERATION\n"); break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION: fprintf(stderr, "GL_INVALID_FRAMEBUFFER_OPERATION\n"); break;
-		case GL_OUT_OF_MEMORY: fprintf(stderr, "GL_OUT_OF_MEMORY\n"); break;
-		default: fprintf(stderr, "Unknown glGetError() return value\n");
-	}
-#endif
-
 	// get time from player and convert to rocket row
 	player_t *player = demo.player;
 	SDL_LockAudioDevice(player->audio_device);

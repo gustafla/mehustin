@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <SDL.h>
-#include <GLES2/gl2.h>
 #include "player.h"
 #include "demo.h"
 
