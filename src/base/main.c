@@ -57,8 +57,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// connect/init rocket and prepare demo for rendering
-	demo_t *demo = demo_init(player, width, height);
-	if (!demo) {
+	if (demo_init(player, width, height)) {
 		fprintf(stderr, "Demo failed to initialize\n");
 		return EXIT_FAILURE;
 	}
@@ -75,7 +74,7 @@ int main(int argc, char *argv[]) {
 			}
 #ifdef DEBUG
 			else if (e.key.keysym.sym == SDLK_r) {
-				if (demo_reload(demo)) {
+				if (demo_reload()) {
 					break;
 				}
 			}
@@ -83,12 +82,12 @@ int main(int argc, char *argv[]) {
 		}
 
 		// render and show to screen
-		demo_render(demo);
+		demo_render();
 		SDL_GL_SwapWindow(window);
 	}
 
 	// disconnect rocket and save tracks
-	demo_free(demo);
+	demo_deinit();
 	player_free(player);
 	SDL_Quit();
 	return EXIT_SUCCESS;

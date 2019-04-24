@@ -4,6 +4,7 @@
 #define GET(x) demo_sync_get_value(demo, x)
 
 #include <stddef.h>
+#include <stdint.h>
 #include "player.h"
 #include "sync.h"
 
@@ -18,16 +19,16 @@ typedef struct demo_t_ {
 	// scene module variables
 #ifndef DEMO_MONOLITHIC
 	void *module;
-	int (*scene_init)(const struct demo_t_*);
-	void (*scene_free)(void);
-	void (*scene_render)(void);
+	int (*scene_init)(int32_t width, int32_t height);
+	void (*scene_deinit)(void);
+	void (*scene_render)(double time);
 #endif
 } demo_t;
 
-demo_t *demo_init(player_t*, int, int);
-void demo_free(demo_t*);
-void demo_render(demo_t*);
-int demo_reload(demo_t*);
-double demo_sync_get_value(const demo_t*, const char*);
+int demo_init(player_t *player, int width, int height);
+void demo_deinit(void);
+void demo_render(void);
+int demo_reload(void);
+double demo_sync_get_value(const char*);
 
 #endif

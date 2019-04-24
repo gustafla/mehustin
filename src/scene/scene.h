@@ -1,11 +1,11 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-struct demo_t;
+#include <stdint.h>
 
-int scene_init(const demo_t*);
-void scene_free(void);
-void scene_render(void);
+int scene_init(int32_t width, int32_t height);
+void scene_deinit(void);
+void scene_render(double time);
 
 #endif
 
