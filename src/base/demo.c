@@ -1,4 +1,6 @@
 #include "demo.h"
+#include "sync.h"
+#include <stdint.h>
 #include <GLES2/gl2.h>
 #include <SDL.h>
 #include <unistd.h>
@@ -9,7 +11,22 @@
 #include "src/scene/scene.h"
 #endif
 
-static demo_t demo;
+static struct demo_ {
+	double time;
+	double row;
+	player_t *player;
+	struct sync_device *rocket;
+	int width;
+	int height;
+
+	// scene module variables
+#ifndef DEMO_MONOLITHIC
+	void *module;
+	int32_t (*scene_init)(int32_t width, int32_t height);
+	void (*scene_deinit)(void);
+	void (*scene_render)(double time);
+#endif
+} demo;
 
 // rocket editor sync with music player
 #ifndef SYNC_PLAYER
@@ -99,7 +116,7 @@ void demo_deinit(void) {
 	}
 
 	// set stuff to null so next time we know what's uninitialized
-	memset(&demo, 0, sizeof(demo_t));
+	memset(&demo, 0, sizeof(struct demo_));
 }
 
 void demo_render(void) {
