@@ -1,6 +1,6 @@
 include config.mk
 
-TARGET=$(BUILDDIR)/demo.so
+TARGET=$(BUILDDIR)/libdemo.so
 SOURCES=$(wildcard src/scene/*.c)
 
 CFLAGS+=$(shell pkg-config --cflags $(PKGS_MODULE)) -fPIC

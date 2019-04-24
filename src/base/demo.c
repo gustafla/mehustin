@@ -169,7 +169,7 @@ int demo_reload(void) {
 	}
 
 	// load scene module
-	demo.module = dlopen("./demo.so", RTLD_LAZY);
+	demo.module = dlopen("./libdemo.so", RTLD_LAZY);
 	if (!demo.module) {
 		fprintf(stderr, "%s\n", dlerror());
 		return EXIT_FAILURE;
