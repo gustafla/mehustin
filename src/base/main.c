@@ -4,18 +4,23 @@
 #include "player.h"
 #include "demo.h"
 
+static void arg_error(char option) {
+	fprintf(stderr, "Bad value for option -%c\n", option);
+	exit(EXIT_FAILURE);
+}
+
 int main(int argc, char *argv[]) {
 	// parse arguments
 	int opt, width = 640, height = 360, fs = 0, bpm = 120, rpb = 8,
 		gl_major = 2, gl_minor = 0, gl = SDL_GL_CONTEXT_PROFILE_ES;
 	while ((opt = getopt(argc, argv, "w:h:b:r:a:i:ecmf")) != -1) {
 		switch (opt) {
-			case 'w': if ((width = atoi(optarg)) < 1) goto arg_error; break;
-			case 'h': if ((height = atoi(optarg)) < 1) goto arg_error; break;
-			case 'b': if ((bpm = atoi(optarg)) < 1) goto arg_error; break;
-			case 'r': if ((rpb = atoi(optarg)) < 1) goto arg_error; break;
-			case 'a': if ((gl_major = atoi(optarg)) < 1) goto arg_error; break;
-			case 'i': if ((gl_minor = atoi(optarg)) < 0) goto arg_error; break;
+			case 'w': if ((width = atoi(optarg)) < 1) arg_error(opt); break;
+			case 'h': if ((height = atoi(optarg)) < 1) arg_error(opt); break;
+			case 'b': if ((bpm = atoi(optarg)) < 1) arg_error(opt); break;
+			case 'r': if ((rpb = atoi(optarg)) < 1) arg_error(opt); break;
+			case 'a': if ((gl_major = atoi(optarg)) < 1) arg_error(opt); break;
+			case 'i': if ((gl_minor = atoi(optarg)) < 0) arg_error(opt); break;
 			case 'e': gl = SDL_GL_CONTEXT_PROFILE_ES; break;
 			case 'c': gl = SDL_GL_CONTEXT_PROFILE_CORE; break;
 			case 'm': gl = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY; break;
@@ -95,8 +100,4 @@ int main(int argc, char *argv[]) {
 	player_free(player);
 	SDL_Quit();
 	return EXIT_SUCCESS;
-
-arg_error:
-	fprintf(stderr, "bad value\n");
-	return EXIT_FAILURE;
 }

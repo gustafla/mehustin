@@ -164,34 +164,32 @@ int demo_reload(void) {
 
 	// load scene api
 	*(void**)(&demo.scene_init) = dlsym(demo.module, "scene_init");
-	if (!demo.scene_init) goto module_error;
 	*(void**)(&demo.scene_deinit) = dlsym(demo.module, "scene_deinit");
-	if (!demo.scene_deinit) goto module_error;
 	*(void**)(&demo.scene_render) = dlsym(demo.module, "scene_render");
-	if (!demo.scene_render) goto module_error;
+	if (!demo.scene_init || !demo.scene_deinit || !demo.scene_render) {
+		fprintf(stderr, "Can't load symbols from module\n");
+		dlclose(demo.module);
+		return EXIT_FAILURE;
+	}
 
 	// init scene
 	demo.scene_data = demo.scene_init(demo.width, demo.height, demo_sync_get_value);
 
 	printf("Scene module loaded\n");
-#else
+#else // ifndef DEMO_MONOLITHIC
 	scene_deinit(demo.scene_data);
 	demo.scene_data = scene_init(demo.width, demo.height, demo_sync_get_value);
 #endif
 
 	if (!demo.scene_data) {
 		fprintf(stderr, "scene_init returned NULL\n");
+#ifndef DEMO_MONOLITHIC
+		dlclose(demo.module);
+#endif
 		return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;
-
-#ifndef DEMO_MONOLITHIC
-module_error:
-	fprintf(stderr, "%s\n", dlerror());
-	dlclose(demo.module);
-	return EXIT_FAILURE;
-#endif
 }
 
 double demo_sync_get_value(const char *name) {
