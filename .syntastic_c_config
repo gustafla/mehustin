@@ -1,0 +1,11 @@
+-I/usr/include/SDL2
+-Ilib/stb
+-Ilib/rocket/lib
+-Ilib/cglm/include
+-DM_PI=3.14159265f
+-DM_PI_2="(2*M_PI)"
+-DM_PI_4="(4*M_PI)"
+-std=c99
+-Wall
+-Wextra
+-Wpedantic
