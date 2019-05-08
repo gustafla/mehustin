@@ -6,6 +6,8 @@
 
 #ifndef DEMO_MONOLITHIC
 #include <dlfcn.h>
+#include <sys/wait.h>
+static const char *MODULE_PATH = "./libdemo.so";
 #else
 #include "src/scene/scene.h"
 #endif
@@ -155,12 +157,30 @@ int demo_reload(void) {
         dlclose(demo.module);
     }
 
-    // load scene module
-    demo.module = dlopen("./libdemo.so", RTLD_LAZY);
+    // generate temporary filename
+    char *tmp_file_path = tmpnam(NULL);
+
+    // copy module file to temporary file
+    pid_t pid = fork();
+    if (pid == 0) {
+        execl("/bin/cp", "/bin/cp", MODULE_PATH, tmp_file_path, NULL);
+    } else if (pid < 0) {
+        fprintf(stderr, "Calling execl /bin/cp failed\n");
+        return EXIT_FAILURE;
+    } else {
+        int status;
+        wait(&status);
+    }
+
+    // load scene module from temporary file
+    demo.module = dlopen(tmp_file_path, RTLD_LAZY);
     if (!demo.module) {
         fprintf(stderr, "%s\n", dlerror());
         return EXIT_FAILURE;
     }
+
+    // unlink (remove) temporary file
+    unlink(tmp_file_path);
 
     // load scene api
     *(void**)(&demo.scene_init) = dlsym(demo.module, "scene_init");
