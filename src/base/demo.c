@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <unistd.h>
 
-#ifndef DEMO_MONOLITHIC
+#ifdef DEMO_RTDL
 #include <dlfcn.h>
 #include <sys/wait.h>
 static const char *MODULE_PATH = "./libdemo.so";
@@ -22,7 +22,7 @@ static struct demo_ {
     void *scene_data;
 
     // scene module variables
-#ifndef DEMO_MONOLITHIC
+#ifdef DEMO_RTDL
     void *module;
     // width, height, getval("...")
     void *(*scene_init)(int32_t, int32_t, double (*)(const char*));
@@ -100,7 +100,7 @@ int demo_init(player_t *player, int width, int height) {
 }
 
 void demo_deinit(void) {
-#ifndef DEMO_MONOLITHIC
+#ifdef DEMO_RTDL
     if (demo.module) {
         if (demo.scene_deinit) {
             demo.scene_deinit(demo.scene_data);
@@ -140,7 +140,7 @@ void demo_render(void) {
     }
 #endif
 
-#ifndef DEMO_MONOLITHIC
+#ifdef DEMO_RTDL
     demo.scene_render(demo.time, demo.scene_data);
 #else
     scene_render(demo.time, demo.scene_data);
@@ -148,7 +148,7 @@ void demo_render(void) {
 }
 
 int demo_reload(void) {
-#ifndef DEMO_MONOLITHIC
+#ifdef DEMO_RTDL
     // clean up if needed
     if (demo.scene_deinit) {
         demo.scene_deinit(demo.scene_data);
@@ -196,14 +196,14 @@ int demo_reload(void) {
     demo.scene_data = demo.scene_init(demo.width, demo.height, demo_sync_get_value);
 
     printf("Scene module loaded\n");
-#else // ifndef DEMO_MONOLITHIC
+#else // ifdef DEMO_RTDL
     scene_deinit(demo.scene_data);
     demo.scene_data = scene_init(demo.width, demo.height, demo_sync_get_value);
 #endif
 
     if (!demo.scene_data) {
         fprintf(stderr, "scene_init returned NULL\n");
-#ifndef DEMO_MONOLITHIC
+#ifdef DEMO_RTDL
         dlclose(demo.module);
 #endif
         return EXIT_FAILURE;

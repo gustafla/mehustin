@@ -4,13 +4,13 @@ TARGET:=$(BUILDDIR)/mehustin
 SOURCES=$(wildcard src/base/*.c)
 
 CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE))
-LDFLAGS+=-L$(BASE)/lib/rocket/lib
-LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE)) -lm -ldl
+LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE)) -lm
 
 ifeq ($(DEBUG),0)
-LDLIBS+=-lrocket-player
+LDLIBS+=-lrocket-player -ldemo
 else
-LDLIBS+=-lrocket
+LDLIBS+=-lrocket -ldl
+CFLAGS+=-DDEMO_RTDL
 endif
 
 include common.mk
