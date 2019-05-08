@@ -168,8 +168,7 @@ int demo_reload(void) {
         fprintf(stderr, "Calling execl /bin/cp failed\n");
         return EXIT_FAILURE;
     } else {
-        int status;
-        wait(&status);
+        wait(NULL);
     }
 
     // load scene module from temporary file
