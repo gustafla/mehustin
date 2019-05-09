@@ -163,7 +163,7 @@ int demo_reload(void) {
     // copy module file to temporary file
     pid_t pid = fork();
     if (pid == 0) {
-        execl("/bin/cp", "/bin/cp", MODULE_PATH, tmp_file_path, NULL);
+        execl("/bin/cp", "cp", MODULE_PATH, tmp_file_path, (char*)NULL);
     } else if (pid < 0) {
         fprintf(stderr, "Calling execl /bin/cp failed\n");
         return EXIT_FAILURE;
