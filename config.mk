@@ -14,7 +14,7 @@ PREFIX?=demo
 BASE?=.
 CC:=gcc
 STRIP:=strip --strip-all
-CFLAGS+=-std=c99 -Wall -Wextra -Wpedantic -I$(BASE) -I$(BASE)/lib/stb -I$(BASE)/lib/rocket/lib -I$(BASE)/lib/cglm/include -DM_PI=3.14159265f -DM_PI_2="(2*M_PI)" -DM_PI_4="(4*M_PI)"
+CFLAGS+=-std=c99 -Wall -Wextra -Wpedantic -I$(BASE) -I$(BASE)/lib/stb -I$(BASE)/lib/rocket/lib
 LDFLAGS+=-L$(BASE)/lib/rocket/lib -L$(BASE)/$(BUILDDIR)
 
 PKGS_EXECUTABLE:=sdl2

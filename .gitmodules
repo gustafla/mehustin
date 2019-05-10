@@ -4,6 +4,3 @@
 [submodule "lib/rocket"]
 	path = lib/rocket
 	url = https://github.com/rocket/rocket
-[submodule "lib/cglm"]
-	path = lib/cglm
-	url = https://github.com/recp/cglm
