@@ -150,7 +150,7 @@ void demo_render(void) {
 int demo_reload(void) {
 #ifdef DEMO_RTDL
     // clean up if needed
-    if (demo.scene_deinit) {
+    if (demo.scene_deinit && demo.scene_data) {
         demo.scene_deinit(demo.scene_data);
     }
     if (demo.module) {
@@ -196,7 +196,9 @@ int demo_reload(void) {
 
     printf("Scene module loaded\n");
 #else // ifdef DEMO_RTDL
-    scene_deinit(demo.scene_data);
+    if (demo.scene_data) {
+        scene_deinit(demo.scene_data);
+    }
     demo.scene_data = scene_init(demo.width, demo.height, demo_sync_get_value);
 #endif
 
