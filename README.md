@@ -7,3 +7,6 @@ function and starts calling `scene_render` in a loop. It also checks for
 keyboard inputs and swaps the window.
 
 Release builds don't (re)load the module dynamically.
+
+While mehustin shouldn't call `scene_deinit` with NULL `scene_data`, it's
+recommended to check for NULLness before freeing your scene data.
