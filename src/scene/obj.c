@@ -106,7 +106,7 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
             }
             if (parse_face(indices, line,
                         indices_in_vertex * VERTS_IN_FACE)) {
-                fprintf(stderr, "Index missing at line %lu\n", line_number);
+                fprintf(stderr, "Index missing at line %zu\n", line_number);
                 goto cleanup_indices;
             }
         } else goto unsupported_line;
@@ -149,7 +149,7 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
     return VERTS_IN_FACE * faces;
 
 unsupported_line:
-    fprintf(stderr, "Unsupported OBJ line %lu\n", line_number);
+    fprintf(stderr, "Unsupported OBJ line %zu\n", line_number);
 cleanup_indices:
     vec_free(indices);
 cleanup_normals:

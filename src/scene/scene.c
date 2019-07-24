@@ -37,5 +37,5 @@ void scene_render(double time, void *data) {
     }
 #endif
 
-    printf("Value of test is: %f\n", scene->get_value("test"));
+    printf("At %f, value of test is: %f\n", time, scene->get_value("test"));
 }
