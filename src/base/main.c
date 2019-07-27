@@ -74,6 +74,13 @@ int main(int argc, char *argv[]) {
     }
 
     SDL_Event e;
+
+    // Set up frame rate counting
+#ifdef DEBUG
+    const unsigned FRAME_RATE_INTERVAL = 2000;
+    unsigned frames = 0;
+    unsigned time = SDL_GetTicks();
+#endif
     while(1) {
         // get sdl events like keyboard or kill signals
         SDL_PollEvent(&e);
@@ -95,6 +102,17 @@ int main(int argc, char *argv[]) {
         // render and show to screen
         demo_render();
         SDL_GL_SwapWindow(window);
+
+        // handle frame rate counting
+#ifdef DEBUG
+        frames++;
+        unsigned newtime = SDL_GetTicks();
+        if (newtime >= time + FRAME_RATE_INTERVAL) {
+            printf("Frame rate: %f\n", frames * 1000.f / FRAME_RATE_INTERVAL);
+            frames = 0;
+            time = newtime;
+        }
+#endif
     }
 
     // disconnect rocket and save tracks
