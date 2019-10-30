@@ -10,3 +10,12 @@ Release builds don't (re)load the module dynamically.
 
 While mehustin shouldn't call `scene_deinit` with NULL `scene_data`, it's
 recommended to check for NULLness before freeing your scene data.
+
+## Build instructions
+
+```
+git submodule update --init
+make libs
+make
+cp debug/mehustin binary/path/of/your/choosing
+```
