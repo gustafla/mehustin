@@ -5,7 +5,7 @@ clean install:
 	$(MAKE) -f executable.mk $(MAKECMDGOALS)
 
 libs:
-	cd lib/rocket; make lib/librocket.a lib/librocket-player.a
+	cd lib/rocket; $(MAKE) lib/librocket.a lib/librocket-player.a
 
 monolithic:
 	make -f monolithic.mk
