@@ -8,4 +8,4 @@ libs:
 	cd lib/rocket; $(MAKE) lib/librocket.a lib/librocket-player.a
 
 monolithic:
-	make -f monolithic.mk
+	$(MAKE) -f monolithic.mk
