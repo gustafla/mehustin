@@ -59,6 +59,11 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Hide cursor in fullscreen mode
+    if (fs) {
+        SDL_ShowCursor(SDL_DISABLE);
+    }
+
     // get and enable an opengl context
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     if (!gl_context) {
