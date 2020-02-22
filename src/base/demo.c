@@ -131,6 +131,10 @@ void demo_render(void) {
     SDL_UnlockAudioDevice(player->audio_device);
     demo.time = byte_at / player->spec.channels / sizeof(Uint16)
         / player->spec.freq;
+    // add precision
+    if (SDL_GetAudioDeviceStatus(player->audio_device) == SDL_AUDIO_PLAYING) {
+        demo.time += (SDL_GetTicks() - player->playback.call_time) / 1000.;
+    }
     demo.row = demo.time * demo.player->row_rate;
 
 #ifndef SYNC_PLAYER

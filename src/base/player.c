@@ -15,6 +15,8 @@ static void callback(void *userdata, Uint8 *stream, int len) {
     len = min(len, playback->bytes - playback->pos);
     // stop here if end reached
     if (len <= 0) return;
+    // Update precise time
+    playback->call_time = SDL_GetTicks();
     // no mixing needed
     memcpy(stream, playback->data + playback->pos, len);
     // update position

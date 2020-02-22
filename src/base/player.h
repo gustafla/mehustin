@@ -7,6 +7,7 @@ typedef struct {
     Uint8 *data;
     size_t bytes;
     size_t pos;
+    unsigned call_time;
 } playback_t;
 
 typedef struct {
