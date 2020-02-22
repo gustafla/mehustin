@@ -17,6 +17,7 @@ typedef struct {
 } player_t;
 
 player_t *player_init(const char*, double, double);
+int player_at_end(player_t *player);
 void player_free(player_t *player);
 
 #endif

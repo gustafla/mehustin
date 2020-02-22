@@ -86,7 +86,11 @@ int main(int argc, char *argv[]) {
     unsigned frames = 0;
     unsigned time = SDL_GetTicks();
 #endif
+#ifdef DEBUG
     while(1) {
+#else
+    while(!player_at_end(player)) {
+#endif
         // get sdl events like keyboard or kill signals
         SDL_PollEvent(&e);
         if (e.type == SDL_QUIT) {

@@ -65,6 +65,10 @@ player_t *player_init(const char *vorbis_file_path, double bpm, double rpb) {
     return player;
 }
 
+int player_at_end(player_t *player) {
+    return player->playback.pos >= player->playback.bytes;
+}
+
 void player_free(player_t *player) {
     if (player->audio_device) {
         SDL_CloseAudioDevice(player->audio_device);
