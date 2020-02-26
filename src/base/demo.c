@@ -25,7 +25,11 @@ static struct demo_ {
 #ifdef DEMO_RTDL
     void *module;
     // width, height, getval("...")
-    void *(*scene_init)(int32_t, int32_t, double (*)(const char*));
+    void *(*scene_init)(
+            int32_t,
+            int32_t,
+            const void *(*)(const char*),
+            double (*)(const void*));
     // data
     void (*scene_deinit)(void*);
     // time, data
@@ -196,14 +200,22 @@ int demo_reload(void) {
     }
 
     // init scene
-    demo.scene_data = demo.scene_init(demo.width, demo.height, demo_sync_get_value);
+    demo.scene_data = demo.scene_init(
+            demo.width,
+            demo.height,
+            demo_sync_get_track,
+            demo_sync_get_value);
 
     printf("Scene module loaded\n");
 #else // ifdef DEMO_RTDL
     if (demo.scene_data) {
         scene_deinit(demo.scene_data);
     }
-    demo.scene_data = scene_init(demo.width, demo.height, demo_sync_get_value);
+    demo.scene_data = scene_init(
+            demo.width,
+            demo.height,
+            demo_sync_get_track,
+            demo_sync_get_value);
 #endif
 
     if (!demo.scene_data) {
@@ -217,7 +229,10 @@ int demo_reload(void) {
     return EXIT_SUCCESS;
 }
 
-double demo_sync_get_value(const char *name) {
-    // ugly because sync_get_track takes long, should keep tracks cached
-    return sync_get_val(sync_get_track(demo.rocket, name), demo.row);
+double demo_sync_get_value(const void *track) {
+    return sync_get_val(track, demo.row);
+}
+
+const void *demo_sync_get_track(const char *name) {
+    return sync_get_track(demo.rocket, name);
 }

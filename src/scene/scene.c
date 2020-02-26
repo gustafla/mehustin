@@ -6,7 +6,8 @@
 #include <math.h>
 
 typedef struct scene_t_ {
-    double (*get_value)(const char*);
+    double (*get_value)(const void*);
+    const void *(*get_track)(const char*);
     int32_t width;
     int32_t height;
     GLuint program;
@@ -69,12 +70,17 @@ GLuint link_program(size_t count, GLuint *shaders) {
     return program;
 }
 
-void* scene_init(int32_t width, int32_t height, double (*getval)(const char*)) {
+void* scene_init(
+        int32_t width,
+        int32_t height,
+        const void *(*gettrack)(const char*),
+        double (*getval)(const void*)) {
     // set up viewport
     glViewport(0, 0, width, height);
 
     scene_t *scene = malloc(sizeof(scene_t));
     scene->get_value = getval;
+    scene->get_track = gettrack;
     scene->width = width;
     scene->height = height;
 
