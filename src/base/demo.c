@@ -144,7 +144,10 @@ void demo_render(void) {
 #ifndef SYNC_PLAYER
     // update rocket
     if (sync_update(demo.rocket, (int)demo.row, &player_cb, (void*)player)) {
-        sync_tcp_connect(demo.rocket, "localhost", SYNC_DEFAULT_PORT);
+        while (sync_tcp_connect(demo.rocket, "localhost", SYNC_DEFAULT_PORT)) {
+            fprintf(stderr, "Attempting to reconnect\n");
+            sleep(2);
+        }
     }
 #endif
 
