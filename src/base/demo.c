@@ -41,6 +41,9 @@ static struct demo_ {
 #ifndef SYNC_PLAYER
 static void player_pause(void *d, int flag) {
     player_t *player = (player_t*)d;
+    SDL_LockAudioDevice(player->audio_device);
+    player->playback.call_time = SDL_GetTicks();
+    SDL_UnlockAudioDevice(player->audio_device);
     SDL_PauseAudioDevice(player->audio_device, flag);
 }
 
