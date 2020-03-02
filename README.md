@@ -1,4 +1,4 @@
-# Mehustin is a Linux OpenGL ES 2.0 demo boilerplate using SDL2 and Rocket
+# Mehustin is Linux demo boilerplate code using SDL2 and Rocket
 
 The tool initializes an SDL2 window with OpenGL ES 2.0 support, after which it
 decodes a music.ogg file for playback using `stb_vorbis`.
@@ -7,9 +7,6 @@ function and starts calling `scene_render` in a loop. It also checks for
 keyboard inputs and swaps the window.
 
 Release builds don't (re)load the module dynamically.
-
-While mehustin shouldn't call `scene_deinit` with NULL `scene_data`, it's
-recommended to check for NULLness before freeing your scene data.
 
 ## Build instructions
 
