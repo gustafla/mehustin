@@ -15,6 +15,7 @@ static const char *MODULE_PATH = "./libdemo.so";
 static struct demo_ {
     double time;
     double row;
+    double row_rate;
     player_t *player;
     struct sync_device *rocket;
     int width;
@@ -49,15 +50,7 @@ static void player_pause(void *d, int flag) {
 
 static void player_set_row(void *d, int row) {
     player_t *player = (player_t*)d;
-    // desired row to byte
-    size_t pos = row / player->row_rate * player->spec.channels * sizeof(Uint16)
-        * player->spec.freq;
-    // align byte position to first byte of left sample
-    pos -= pos % (player->spec.channels * sizeof(Uint16));
-    // update player position
-    SDL_LockAudioDevice(player->audio_device);
-    player->playback.pos = pos;
-    SDL_UnlockAudioDevice(player->audio_device);
+    player_set_time(player, row / demo.row_rate);
 }
 
 static int player_is_playing(void *d) {
@@ -72,7 +65,7 @@ static struct sync_cb player_cb = {
 };
 #endif
 
-int demo_init(player_t *player, int width, int height) {
+int demo_init(player_t *player, int width, int height, double bpm, double rpb) {
     // init rocket
     demo.rocket = sync_create_device("sync");
     if (!demo.rocket) {
@@ -92,6 +85,9 @@ int demo_init(player_t *player, int width, int height) {
     // store resolution
     demo.width = width;
     demo.height = height;
+
+    // set row rate
+    demo.row_rate = (bpm / 60.) * rpb;
 
     // init scene
     if (demo_reload()) {
@@ -131,18 +127,10 @@ void demo_deinit(void) {
 }
 
 void demo_render(void) {
-    // get time from player and convert to rocket row
+    // get time from player
     player_t *player = demo.player;
-    SDL_LockAudioDevice(player->audio_device);
-    double byte_at = player->playback.pos;
-    SDL_UnlockAudioDevice(player->audio_device);
-    demo.time = byte_at / player->spec.channels / sizeof(Uint16)
-        / player->spec.freq;
-    // add precision
-    if (SDL_GetAudioDeviceStatus(player->audio_device) == SDL_AUDIO_PLAYING) {
-        demo.time += (SDL_GetTicks() - player->playback.call_time) / 1000.;
-    }
-    demo.row = demo.time * demo.player->row_rate;
+    demo.time = player_get_time(player);
+    demo.row = demo.time * demo.row_rate;
 
 #ifndef SYNC_PLAYER
     // update rocket

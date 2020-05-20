@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     }
 
     // decode vorbis music and prepare player
-    player_t *player = player_init("music.ogg", bpm, rpb);
+    player_t *player = player_init("music.ogg");
     if (!player) {
         return EXIT_FAILURE;
     }
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
     }
 
     // connect/init rocket and prepare demo for rendering
-    if (demo_init(player, width, height)) {
+    if (demo_init(player, width, height, bpm, rpb)) {
         fprintf(stderr, "Demo failed to initialize\n");
         return EXIT_FAILURE;
     }

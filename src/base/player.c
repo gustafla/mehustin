@@ -23,7 +23,7 @@ static void callback(void *userdata, Uint8 *stream, int len) {
     playback->pos += len;
 }
 
-player_t *player_init(const char *vorbis_file_path, double bpm, double rpb) {
+player_t *player_init(const char *vorbis_file_path) {
     player_t *player = calloc(1, sizeof(player_t));
     if (!player) return NULL;
 
@@ -61,14 +61,36 @@ player_t *player_init(const char *vorbis_file_path, double bpm, double rpb) {
         return NULL;
     }
 
-    // set row rate
-    player->row_rate = (bpm / 60.) * rpb;
-
     return player;
 }
 
 int player_at_end(player_t *player) {
     return player->playback.pos >= player->playback.bytes;
+}
+
+double player_get_time(player_t *player) {
+    SDL_LockAudioDevice(player->audio_device);
+    double byte_at = player->playback.pos;
+    SDL_UnlockAudioDevice(player->audio_device);
+    double time = byte_at / player->spec.channels / sizeof(Uint16)
+        / player->spec.freq;
+    // add precision
+    if (SDL_GetAudioDeviceStatus(player->audio_device) == SDL_AUDIO_PLAYING) {
+        time += (SDL_GetTicks() - player->playback.call_time) / 1000.;
+    }
+    return time;
+}
+
+void player_set_time(player_t *player, double time) {
+    // desired time to byte
+    size_t pos = time * player->spec.channels * sizeof(Uint16)
+        * player->spec.freq;
+    // align byte position to first byte of left sample
+    pos -= pos % (player->spec.channels * sizeof(Uint16));
+    // update player position
+    SDL_LockAudioDevice(player->audio_device);
+    player->playback.pos = pos;
+    SDL_UnlockAudioDevice(player->audio_device);
 }
 
 void player_free(player_t *player) {

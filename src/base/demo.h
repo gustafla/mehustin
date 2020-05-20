@@ -5,7 +5,7 @@
 
 #include "player.h"
 
-int demo_init(player_t *player, int width, int height);
+int demo_init(player_t *player, int width, int height, double bpm, double rpb);
 void demo_deinit(void);
 void demo_render(void);
 int demo_reload(void);
