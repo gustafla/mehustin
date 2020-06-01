@@ -40,28 +40,15 @@ static struct demo_ {
 
 // rocket editor sync with music player
 #ifndef SYNC_PLAYER
-static void player_pause(void *d, int flag) {
-    player_t *player = (player_t*)d;
-    SDL_LockAudioDevice(player->audio_device);
-    player->playback.call_time = SDL_GetTicks();
-    SDL_UnlockAudioDevice(player->audio_device);
-    SDL_PauseAudioDevice(player->audio_device, flag);
-}
-
 static void player_set_row(void *d, int row) {
     player_t *player = (player_t*)d;
     player_set_time(player, row / demo.row_rate);
 }
 
-static int player_is_playing(void *d) {
-    player_t *player = (player_t*)d;
-    return SDL_GetAudioDeviceStatus(player->audio_device) == SDL_AUDIO_PLAYING;
-}
-
 static struct sync_cb player_cb = {
-    player_pause,
-    player_set_row,
-    player_is_playing
+    (void (*)(void*, int))player_pause, // player.c
+    player_set_row, //demo.c
+    (int (*)(void*))player_is_playing //player.c
 };
 #endif
 
@@ -97,7 +84,7 @@ int demo_init(player_t *player, int width, int height, double bpm, double rpb) {
 
     // start music
     demo.player = player;
-    SDL_PauseAudioDevice(player->audio_device, 0);
+    player_pause(player, 0);
 
     return EXIT_SUCCESS;
 }

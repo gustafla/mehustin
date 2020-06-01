@@ -14,11 +14,15 @@ typedef struct {
     SDL_AudioDeviceID audio_device;
     SDL_AudioSpec spec;
     playback_t playback;
+    double set_time; // Used if cannot actually output audio
+    int playing; // Used if cannot actually output audio
 } player_t;
 
 player_t *player_init(const char*);
 int player_at_end(player_t *player);
+int player_is_playing(player_t *player);
 double player_get_time(player_t *player);
+void player_pause(player_t *player, int flag);
 void player_set_time(player_t *player, double);
 void player_free(player_t *player);
 
