@@ -2,6 +2,7 @@ mehustin
 demo
 release/
 debug/
+build/
 *.o
 *.so
 *.track

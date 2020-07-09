@@ -9,7 +9,7 @@
 #include <sys/wait.h>
 static const char *MODULE_PATH = "./libdemo.so";
 #else
-#include "src/scene/scene.h"
+#include "scene.h"
 #endif
 
 static struct demo_ {
