@@ -9,3 +9,5 @@ debug/
 *.png
 *.obj
 *.rocket
+.cache/
+compile_commands.json
