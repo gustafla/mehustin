@@ -1,9 +1,9 @@
 #include "obj.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
 #include "vec.h"
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define LINE_LEN 81
 
@@ -16,9 +16,9 @@
 
 static void parse_vector(vec_t *vec, char *str, size_t n) {
     str += 2; // skip "v*" from beginning of line
-    for (size_t i=0; i<n; i++) {
+    for (size_t i = 0; i < n; i++) {
         GLfloat f = strtof(str, &str);
-        vec_push(vec, (void*)&f);
+        vec_push(vec, (void *)&f);
     }
 }
 
@@ -27,13 +27,15 @@ static size_t parse_face(vec_t *vec, char *str, size_t n) {
     while ((token = strtok(NULL, " /"))) {
         if (!n) {
             fprintf(stderr, "Warning: face may be parsed incorrectly.\n"
-                    "Only triangles are supported.\n");
+                            "Only triangles are supported.\n");
             break; // limit to n iterations
         }
-        if (!token[0]) continue; // skip empty
+        if (!token[0])
+            continue; // skip empty
         size_t i = strtoul(token, NULL, 0);
-        if (i == 0) break; // check for error
-        vec_push(vec, (void*)&i);
+        if (i == 0)
+            break; // check for error
+        vec_push(vec, (void *)&i);
         n--;
     }
     return n;
@@ -42,28 +44,34 @@ static size_t parse_face(vec_t *vec, char *str, size_t n) {
 static size_t charcount(const char *str, char c) {
     size_t count = 0;
     while (*(str++)) {
-        if (*str == c) count++;
+        if (*str == c)
+            count++;
     }
     return count;
 }
 
 size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
-       obj_features_t *features, size_t *vertex_size) {
+                          obj_features_t *features, size_t *vertex_size) {
     FILE *file = fopen(obj_file_path, "r");
-    if (!file) goto error;
+    if (!file)
+        goto error;
 
     // set features to none so far
     *features = 0;
 
     // allocate temp vecs for holding mesh data
     vec_t *vertices = vec_init(sizeof(GLfloat));
-    if (!vertices) goto cleanup_file;
+    if (!vertices)
+        goto cleanup_file;
     vec_t *texture_coordinates = vec_init(sizeof(GLfloat));
-    if (!texture_coordinates) goto cleanup_vertices;
+    if (!texture_coordinates)
+        goto cleanup_vertices;
     vec_t *normals = vec_init(sizeof(GLfloat));
-    if (!normals) goto cleanup_texture_coordinates;
+    if (!normals)
+        goto cleanup_texture_coordinates;
     vec_t *indices = vec_init(sizeof(size_t));
-    if (!indices) goto cleanup_normals;
+    if (!indices)
+        goto cleanup_normals;
 
     // variables for deindexing
     vec_t *vector_vecs[] = {vertices, NULL, NULL};
@@ -76,7 +84,8 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
     size_t vertex_len = VERTEX_COORD_LEN, indices_in_vertex = 1;
     while (fgets(line, LINE_LEN, file)) {
         line_number++;
-        if (line[0] == '#' || line[0] == '\n') continue; // ignore comments
+        if (line[0] == '#' || line[0] == '\n')
+            continue; // ignore comments
         if (line[0] == 'v') {
             if (line[1] == ' ') { // add a vertex coordinate
                 parse_vector(vertices, line, VERTEX_COORD_LEN);
@@ -84,8 +93,9 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
                 parse_vector(texture_coordinates, line, TEXTURE_COORD_LEN);
             } else if (line[1] == 'n') { // add a normal
                 parse_vector(normals, line, NORMAL_LEN);
-            } else goto unsupported_line;
-        } else if (line [0] == 'f' && line[1] == ' ') { // add face / indices
+            } else
+                goto unsupported_line;
+        } else if (line[0] == 'f' && line[1] == ' ') { // add face / indices
             faces++;
             if (!indices->use) { // first face determines the format
                 size_t separators = charcount(line, '/');
@@ -101,15 +111,16 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
                         vector_vecs[vec_at] = normals;
                         vertex_len += vector_lens[vec_at++] = NORMAL_LEN;
                         *features |= OBJ_NORMALS;
-                    } else if (separators != 3) goto unsupported_line;
+                    } else if (separators != 3)
+                        goto unsupported_line;
                 }
             }
-            if (parse_face(indices, line,
-                        indices_in_vertex * VERTS_IN_FACE)) {
+            if (parse_face(indices, line, indices_in_vertex * VERTS_IN_FACE)) {
                 fprintf(stderr, "Index missing at line %zu\n", line_number);
                 goto cleanup_indices;
             }
-        } else goto unsupported_line;
+        } else
+            goto unsupported_line;
     }
 
     if (!faces) {
@@ -120,7 +131,8 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
     // allocate *mesh
     size_t mesh_len = vertex_len * VERTS_IN_FACE * faces;
     *mesh = malloc(sizeof(GLfloat) * mesh_len);
-    if (!*mesh) goto cleanup_indices;
+    if (!*mesh)
+        goto cleanup_indices;
     *vertex_size = sizeof(GLfloat) * vertex_len;
 
     // deindex to *mesh
@@ -134,8 +146,8 @@ size_t load_obj_deindexed(const char *obj_file_path, GLfloat **mesh,
                 size_t index = VEC_GET(indices, size_t, index_at) - 1;
                 size_t float_index = vector_lens[i] * index;
                 memcpy((*mesh) + mesh_pos,
-                        &VEC_GET(vector_vecs[i], GLfloat, float_index),
-                        sizeof(GLfloat) * vector_lens[i]);
+                       &VEC_GET(vector_vecs[i], GLfloat, float_index),
+                       sizeof(GLfloat) * vector_lens[i]);
                 mesh_pos += vector_lens[i];
             }
         }

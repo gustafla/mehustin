@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#define VEC_GET(vec, type, index) (((type*)vec->buffer)[index])
+#define VEC_GET(vec, type, index) (((type *)vec->buffer)[index])
 
 typedef struct {
     char *buffer;
