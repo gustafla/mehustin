@@ -1,10 +1,14 @@
 #define _POSIX_C_SOURCE 2
 
+#include "demo.h"
+#include "player.h"
+#include <SDL.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <SDL.h>
-#include "player.h"
-#include "demo.h"
+
+#ifdef MONOLITH
+#include "music.h"
+#endif
 
 static void arg_error(char option) {
     fprintf(stderr, "Bad value for option -%c\n", option);
@@ -14,20 +18,47 @@ static void arg_error(char option) {
 int main(int argc, char *argv[]) {
     // parse arguments
     int opt, width = 640, height = 360, fs = 0, bpm = 120, rpb = 8,
-        gl_major = 2, gl_minor = 0, gl = SDL_GL_CONTEXT_PROFILE_ES;
+             gl_major = 2, gl_minor = 0, gl = SDL_GL_CONTEXT_PROFILE_ES;
     while ((opt = getopt(argc, argv, "w:h:b:r:a:i:ecmf")) != -1) {
         switch (opt) {
-            case 'w': if ((width = atoi(optarg)) < 1) arg_error(opt); break;
-            case 'h': if ((height = atoi(optarg)) < 1) arg_error(opt); break;
-            case 'b': if ((bpm = atoi(optarg)) < 1) arg_error(opt); break;
-            case 'r': if ((rpb = atoi(optarg)) < 1) arg_error(opt); break;
-            case 'a': if ((gl_major = atoi(optarg)) < 1) arg_error(opt); break;
-            case 'i': if ((gl_minor = atoi(optarg)) < 0) arg_error(opt); break;
-            case 'e': gl = SDL_GL_CONTEXT_PROFILE_ES; break;
-            case 'c': gl = SDL_GL_CONTEXT_PROFILE_CORE; break;
-            case 'm': gl = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY; break;
-            case 'f': fs = !fs; break;
-            default: return EXIT_FAILURE;
+        case 'w':
+            if ((width = atoi(optarg)) < 1)
+                arg_error(opt);
+            break;
+        case 'h':
+            if ((height = atoi(optarg)) < 1)
+                arg_error(opt);
+            break;
+        case 'b':
+            if ((bpm = atoi(optarg)) < 1)
+                arg_error(opt);
+            break;
+        case 'r':
+            if ((rpb = atoi(optarg)) < 1)
+                arg_error(opt);
+            break;
+        case 'a':
+            if ((gl_major = atoi(optarg)) < 1)
+                arg_error(opt);
+            break;
+        case 'i':
+            if ((gl_minor = atoi(optarg)) < 0)
+                arg_error(opt);
+            break;
+        case 'e':
+            gl = SDL_GL_CONTEXT_PROFILE_ES;
+            break;
+        case 'c':
+            gl = SDL_GL_CONTEXT_PROFILE_CORE;
+            break;
+        case 'm':
+            gl = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
+            break;
+        case 'f':
+            fs = !fs;
+            break;
+        default:
+            return EXIT_FAILURE;
         }
     }
 
@@ -38,7 +69,11 @@ int main(int argc, char *argv[]) {
     }
 
     // decode vorbis music and prepare player
-    player_t *player = player_init("music.ogg");
+#ifdef MONOLITH
+    player_t *player = player_init_memory(music_ogg, music_ogg_len);
+#else
+    player_t *player = player_init_file("music.ogg");
+#endif
     if (!player) {
         return EXIT_FAILURE;
     }
@@ -49,9 +84,10 @@ int main(int argc, char *argv[]) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, gl);
 
     // get an opengl window
-    SDL_Window *window = SDL_CreateWindow((optind < argc ? argv[optind] : "-"),
-            SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height,
-            SDL_WINDOW_OPENGL | (fs ? SDL_WINDOW_FULLSCREEN : 0));
+    SDL_Window *window = SDL_CreateWindow(
+        (optind < argc ? argv[optind] : "-"), SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, width, height,
+        SDL_WINDOW_OPENGL | (fs ? SDL_WINDOW_FULLSCREEN : 0));
     if (!window) {
         fprintf(stderr, "SDL2 failed to initialize a window: %s\n",
                 SDL_GetError());
@@ -87,9 +123,9 @@ int main(int argc, char *argv[]) {
     unsigned time = SDL_GetTicks();
 #endif
 #ifdef DEBUG
-    while(1) {
+    while (1) {
 #else
-    while(!player_at_end(player)) {
+    while (!player_at_end(player)) {
 #endif
         // get sdl events like keyboard or kill signals
         SDL_PollEvent(&e);

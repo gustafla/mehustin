@@ -1,11 +1,14 @@
-.PHONY: clean install libs monolithic
+.PHONY: clean install libs monolith
 
-clean install:
+install:
 	$(MAKE) -f module.mk $(MAKECMDGOALS)
 	$(MAKE) -f executable.mk $(MAKECMDGOALS)
 
 libs:
 	cd lib/rocket; $(MAKE) lib/librocket.a lib/librocket-player.a
 
-monolithic:
+monolith:
 	$(MAKE) -f monolithic.mk
+
+clean:
+	rm -rf debug release demo

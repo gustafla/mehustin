@@ -14,9 +14,10 @@ PREFIX?=demo
 BASE?=.
 CC:=gcc
 STRIP:=strip --strip-all
-CFLAGS+=-std=c99 -Wall -Wextra -Wpedantic -I$(BASE) -I$(BASE)/lib/stb -I$(BASE)/lib/rocket/lib
+CFLAGS+=-std=c99 -Wall -Wextra -Wpedantic -I$(BASE) -I$(BASE)/lib/stb -I$(BASE)/lib/rocket/lib -I$(BUILDDIR)
 LDFLAGS+=-L$(BASE)/lib/rocket/lib -L$(BASE)/$(BUILDDIR)
 
 PKGS_EXECUTABLE:=sdl2
 PKGS_MODULE:=glesv2
 
+SHADERS=$(wildcard src/scene/*.frag) $(wildcard src/scene/*.vert)

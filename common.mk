@@ -15,8 +15,3 @@ $(BUILDDIR)/%.o: src/%.c
 	$(info Compiling $@)
 	@mkdir -p $(@D)
 	@$(CC) $(CFLAGS) -c -o $@ $<
-
-.PHONY: clean
-
-clean:
-	rm -f $(TARGET) $(OBJS)
