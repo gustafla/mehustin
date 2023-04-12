@@ -20,4 +20,6 @@ LDFLAGS+=-L$(BASE)/lib/rocket/lib -L$(BASE)/$(BUILDDIR)
 PKGS_EXECUTABLE:=sdl2
 PKGS_MODULE:=glesv2
 
-SHADERS=$(wildcard src/scene/*.frag) $(wildcard src/scene/*.vert)
+MODULE_PATH=$(BUILDDIR)/libdemo.so
+
+SHADERS=$(wildcard *.frag) $(wildcard *.vert)

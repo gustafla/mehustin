@@ -1,13 +1,15 @@
 #include "demo.h"
 #include "sync.h"
-#include <stdint.h>
 #include <SDL.h>
+#include <stdint.h>
 #include <unistd.h>
 
 #ifdef DEMO_RTDL
 #include <dlfcn.h>
 #include <sys/wait.h>
-static const char *MODULE_PATH = "./libdemo.so";
+#ifndef MODULE_PATH
+#define MODULE_PATH "./libdemo.so"
+#endif
 #else
 #include "src/scene/scene.h"
 #endif
@@ -26,29 +28,26 @@ static struct demo_ {
 #ifdef DEMO_RTDL
     void *module;
     // width, height, getval("...")
-    void *(*scene_init)(
-            int32_t,
-            int32_t,
-            const void *(*)(const char*),
-            double (*)(const void*));
+    void *(*scene_init)(int32_t, int32_t, const void *(*)(const char *),
+                        double (*)(const void *));
     // data
-    void (*scene_deinit)(void*);
+    void (*scene_deinit)(void *);
     // time, data
-    void (*scene_render)(double, void*);
+    void (*scene_render)(double, void *);
 #endif
 } demo;
 
 // rocket editor sync with music player
 #ifndef SYNC_PLAYER
 static void player_set_row(void *d, int row) {
-    player_t *player = (player_t*)d;
+    player_t *player = (player_t *)d;
     player_set_time(player, row / demo.row_rate);
 }
 
 static struct sync_cb player_cb = {
-    (void (*)(void*, int))player_pause, // player.c
-    player_set_row, //demo.c
-    (int (*)(void*))player_is_playing //player.c
+    (void (*)(void *, int))player_pause, // player.c
+    player_set_row,                      // demo.c
+    (int (*)(void *))player_is_playing   // player.c
 };
 #endif
 
@@ -121,7 +120,7 @@ void demo_render(void) {
 
 #ifndef SYNC_PLAYER
     // update rocket
-    if (sync_update(demo.rocket, (int)demo.row, &player_cb, (void*)player)) {
+    if (sync_update(demo.rocket, (int)demo.row, &player_cb, (void *)player)) {
         while (sync_tcp_connect(demo.rocket, "localhost", SYNC_DEFAULT_PORT)) {
             fprintf(stderr, "Attempting to reconnect\n");
             sleep(2);
@@ -152,7 +151,7 @@ int demo_reload(void) {
     // copy module file to temporary file
     pid_t pid = fork();
     if (pid == 0) {
-        execl("/bin/cp", "cp", MODULE_PATH, tmp_file_path, (char*)NULL);
+        execl("/bin/cp", "cp", MODULE_PATH, tmp_file_path, (char *)NULL);
     } else if (pid < 0) {
         fprintf(stderr, "Calling execl /bin/cp failed\n");
         return EXIT_FAILURE;
@@ -171,9 +170,9 @@ int demo_reload(void) {
     unlink(tmp_file_path);
 
     // load scene api
-    *(void**)(&demo.scene_init) = dlsym(demo.module, "scene_init");
-    *(void**)(&demo.scene_deinit) = dlsym(demo.module, "scene_deinit");
-    *(void**)(&demo.scene_render) = dlsym(demo.module, "scene_render");
+    *(void **)(&demo.scene_init) = dlsym(demo.module, "scene_init");
+    *(void **)(&demo.scene_deinit) = dlsym(demo.module, "scene_deinit");
+    *(void **)(&demo.scene_render) = dlsym(demo.module, "scene_render");
     if (!demo.scene_init || !demo.scene_deinit || !demo.scene_render) {
         fprintf(stderr, "Can't load symbols from module\n");
         dlclose(demo.module);
@@ -181,22 +180,16 @@ int demo_reload(void) {
     }
 
     // init scene
-    demo.scene_data = demo.scene_init(
-            demo.width,
-            demo.height,
-            demo_sync_get_track,
-            demo_sync_get_value);
+    demo.scene_data = demo.scene_init(demo.width, demo.height,
+                                      demo_sync_get_track, demo_sync_get_value);
 
     printf("Scene module loaded\n");
 #else // ifdef DEMO_RTDL
     if (demo.scene_data) {
         scene_deinit(demo.scene_data);
     }
-    demo.scene_data = scene_init(
-            demo.width,
-            demo.height,
-            demo_sync_get_track,
-            demo_sync_get_value);
+    demo.scene_data = scene_init(demo.width, demo.height, demo_sync_get_track,
+                                 demo_sync_get_value);
 #endif
 
     if (!demo.scene_data) {

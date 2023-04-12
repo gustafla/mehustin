@@ -10,7 +10,7 @@ ifeq ($(DEBUG),0)
 LDLIBS+=-lrocket-player -ldemo
 else
 LDLIBS+=-lrocket -ldl
-CFLAGS+=-DDEMO_RTDL
+CFLAGS+=-DDEMO_RTDL -DMODULE_PATH=\"$(MODULE_PATH)\"
 endif
 
 include common.mk
