@@ -1,5 +1,5 @@
 #include "scene.h"
-#include "read_file.h"
+#include "resources.h"
 #include <GLES2/gl2.h>
 #include <math.h>
 #include <stdio.h>
@@ -27,51 +27,6 @@ typedef struct scene_t_ {
     GLuint post_program;
     GLuint post_buffer;
 } scene_t;
-
-GLuint compile_shader(GLenum shader_type, const char *shader_src) {
-    GLuint shader;
-
-    shader = glCreateShader(shader_type);
-    glShaderSource(shader, 1, (const GLchar *const *)&shader_src, NULL);
-    glCompileShader(shader);
-
-    GLint status;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (status == GL_FALSE) {
-        GLint log_len;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_len);
-        GLchar *log = malloc(sizeof(GLchar) * log_len);
-        glGetShaderInfoLog(shader, log_len, NULL, log);
-        fprintf(stderr, "Shader compilation failed:\n%s\n", log);
-        free(log);
-        return 0;
-    }
-
-    return shader;
-}
-
-GLuint compile_shader_file(GLenum shader_type, const char *path) {
-    char *shader_src = NULL;
-
-    if (read_file_to_str(path, &shader_src) == 0) {
-        return 0;
-    }
-
-    GLuint shader = compile_shader(shader_type, shader_src);
-    free(shader_src);
-
-    if (shader == 0) {
-        fprintf(stderr, "File: %s\n", path);
-    }
-
-    return shader;
-}
-
-#ifdef MONOLITH
-#define SHADER(GLTYPE, NAME, TYPE) compile_shader(GLTYPE, NAME##_##TYPE)
-#else
-#define SHADER(GLTYPE, NAME, TYPE) compile_shader_file(GLTYPE, #NAME "." #TYPE)
-#endif
 
 GLuint link_program(size_t count, GLuint *shaders) {
     GLuint program = glCreateProgram();
