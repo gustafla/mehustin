@@ -18,10 +18,10 @@ include common.mk
 
 .PHONY: install
 
-install: $(TARGET) LICENSE demo.sh
+install: $(TARGET) LICENSE src/demo.sh
 	cp $(TARGET) $(PREFIX)/bin/
 	cp LICENSE $(PREFIX)/
-	cp demo.sh $(PREFIX)/
+	cp src/demo.sh $(PREFIX)/
 	-git clone ./ $(PREFIX)/src
 	-cd $(PREFIX)/src; rm -rf .git
 
