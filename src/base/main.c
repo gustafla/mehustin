@@ -29,6 +29,7 @@ static void arg_error(char option) {
 }
 
 int main(int argc, char *argv[]) {
+    int ret = 0;
     // parse arguments
     int opt, width = 640, height = 360, fs = 0, bpm = 120, rpb = 8,
              gl_major = GL_MAJOR, gl_minor = GL_MINOR, gl = SDL_GL_PROFILE;
@@ -82,12 +83,13 @@ int main(int argc, char *argv[]) {
     }
 
     // decode vorbis music and prepare player
+    player_t player;
 #ifdef MONOLITH
-    player_t *player = player_init_memory(music_ogg, music_ogg_len);
+    ret = player_init_memory(&player, music_ogg, music_ogg_len);
 #else
-    player_t *player = player_init_file("music.ogg");
+    ret = player_init_file(&player, "music.ogg");
 #endif
-    if (!player) {
+    if (ret != 0) {
         return EXIT_FAILURE;
     }
 
@@ -122,7 +124,7 @@ int main(int argc, char *argv[]) {
     }
 
     // connect/init rocket and prepare demo for rendering
-    if (demo_init(player, width, height, bpm, rpb)) {
+    if (demo_init(&player, width, height, bpm, rpb)) {
         fprintf(stderr, "Demo failed to initialize\n");
         return EXIT_FAILURE;
     }
@@ -138,7 +140,7 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG
     while (1) {
 #else
-    while (!player_at_end(player)) {
+    while (!player_at_end(&player)) {
 #endif
         // get sdl events like keyboard or kill signals
         SDL_PollEvent(&e);
@@ -175,7 +177,7 @@ int main(int argc, char *argv[]) {
 
     // disconnect rocket and save tracks
     demo_deinit();
-    player_free(player);
+    player_destroy(&player);
     SDL_Quit();
     return EXIT_SUCCESS;
 }

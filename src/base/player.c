@@ -26,12 +26,12 @@ static void callback(void *userdata, Uint8 *stream, int len) {
     playback->pos += len;
 }
 
-player_t *player_init(short *audio, int channels, int sample_rate,
-                      int samples) {
-
-    player_t *player = calloc(1, sizeof(player_t));
+int player_init(player_t *player, short *audio, int channels, int sample_rate,
+                int samples) {
     if (!player)
-        return NULL;
+        return -1;
+
+    bzero(player, sizeof(player_t));
 
     if (samples > 0) {
         // cast audio to bytes for playback and compute size in bytes
@@ -58,10 +58,10 @@ player_t *player_init(short *audio, int channels, int sample_rate,
         }
     }
 
-    return player;
+    return 0;
 }
 
-player_t *player_init_file(const char *vorbis_file_path) {
+int player_init_file(player_t *player, const char *vorbis_file_path) {
     // decode vorbis file
     short *audio;
     int channels, sample_rate;
@@ -72,16 +72,17 @@ player_t *player_init_file(const char *vorbis_file_path) {
         fprintf(stderr, "Starting without audio (end with ESC or q)\n");
         sleep(2);
     }
-    return player_init(audio, channels, sample_rate, samples);
+    return player_init(player, audio, channels, sample_rate, samples);
 }
 
-player_t *player_init_memory(const unsigned char *vorbis_file_data, int len) {
+int player_init_memory(player_t *player, const unsigned char *vorbis_file_data,
+                       int len) {
     // decode vorbis file
     short *audio;
     int channels, sample_rate;
     int samples = stb_vorbis_decode_memory(vorbis_file_data, len, &channels,
                                            &sample_rate, &audio);
-    return player_init(audio, channels, sample_rate, samples);
+    return player_init(player, audio, channels, sample_rate, samples);
 }
 
 int player_at_end(player_t *player) {
@@ -152,12 +153,11 @@ void player_set_time(player_t *player, double time) {
     }
 }
 
-void player_free(player_t *player) {
+void player_destroy(player_t *player) {
     if (player->audio_device) {
         SDL_CloseAudioDevice(player->audio_device);
     }
     if (player->playback.data) {
         free(player->playback.data);
     }
-    free(player);
 }
