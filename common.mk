@@ -4,14 +4,12 @@ OBJS=$(patsubst %.c,%.o,$(SOURCES:src/%=$(BUILDDIR)/%))
 $(TARGET): $(OBJS)
 	$(info Linking $@)
 	@mkdir -p $(@D)
-	@$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LDLIBS)
+	$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LDLIBS)
 ifeq ($(DEBUG),0)
-	$(info Stripping $@)
-	@$(STRIP) $(TARGET)
+	$(STRIP) $(TARGET)
 endif
 
 # compile target
 $(BUILDDIR)/%.o: src/%.c
-	$(info Compiling $@)
 	@mkdir -p $(@D)
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<

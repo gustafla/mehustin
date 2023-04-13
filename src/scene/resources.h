@@ -1,7 +1,7 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
-#include <GLES2/gl2.h>
+#include "gl.h"
 #include <stddef.h>
 
 size_t read_file_to_str(const char *, char **);

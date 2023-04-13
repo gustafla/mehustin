@@ -1,6 +1,6 @@
 #include "scene.h"
+#include "gl.h"
 #include "resources.h"
-#include <GLES2/gl2.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

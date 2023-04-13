@@ -10,6 +10,19 @@
 #include "music.h"
 #endif
 
+#ifndef GL_PROFILE
+#define GL_PROFILE CORE
+#endif
+#ifndef GL_MAJOR
+#define GL_MAJOR 3
+#endif
+#ifndef GL_MINOR
+#define GL_MINOR 3
+#endif
+#define SDL_GL_PROFILE__(prof) SDL_GL_CONTEXT_PROFILE_##prof
+#define SDL_GL_PROFILE_(prof) SDL_GL_PROFILE__(prof)
+#define SDL_GL_PROFILE SDL_GL_PROFILE_(GL_PROFILE)
+
 static void arg_error(char option) {
     fprintf(stderr, "Bad value for option -%c\n", option);
     exit(EXIT_FAILURE);
@@ -18,7 +31,7 @@ static void arg_error(char option) {
 int main(int argc, char *argv[]) {
     // parse arguments
     int opt, width = 640, height = 360, fs = 0, bpm = 120, rpb = 8,
-             gl_major = 2, gl_minor = 0, gl = SDL_GL_CONTEXT_PROFILE_ES;
+             gl_major = GL_MAJOR, gl_minor = GL_MINOR, gl = SDL_GL_PROFILE;
     while ((opt = getopt(argc, argv, "w:h:b:r:a:i:ecmf")) != -1) {
         switch (opt) {
         case 'w':

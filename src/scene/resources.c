@@ -1,4 +1,4 @@
-#include <GLES2/gl2.h>
+#include "gl.h"
 #include <stdio.h>
 #include <stdlib.h>
 

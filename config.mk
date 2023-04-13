@@ -18,7 +18,13 @@ CFLAGS+=-std=c99 -Wall -Wextra -Wpedantic -I$(BASE) -I$(BASE)/lib/stb -I$(BASE)/
 LDFLAGS+=-L$(BASE)/lib/rocket/lib -L$(BASE)/$(BUILDDIR)
 
 PKGS_EXECUTABLE:=sdl2
+ifeq ($(GLES),1)
 PKGS_MODULE:=glesv2
+CFLAGS+=-DGL_MAJOR=2 -DGL_MINOR=0 -DGL_PROFILE=ES
+else
+PKGS_MODULE:=gl
+CFLAGS+=-DGL_MAJOR=3 -DGL_MINOR=3 -DGL_PROFILE=CORE
+endif
 
 MODULE_PATH=$(BUILDDIR)/libdemo.so
 
