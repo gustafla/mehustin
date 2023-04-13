@@ -14,7 +14,7 @@ include common.mk
 install: $(TARGET)
 	-mkdir -p $(PREFIX)/bin
 	cp $(TARGET) $(PREFIX)/bin/
-	-cp $(SHADERS) $(PREFIX)/bin/
+	-cp -r shaders $(PREFIX)/bin/
 	-cp *.track $(PREFIX)/bin/
 	-cp music.ogg $(PREFIX)/bin/
 	-cp README.md $(PREFIX)/

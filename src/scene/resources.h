@@ -15,7 +15,8 @@ GLuint compile_shader_file(GLenum, const char *);
 #ifdef MONOLITH
 #define SHADER(GLTYPE, NAME, TYPE) compile_shader(GLTYPE, NAME##_##TYPE)
 #else
-#define SHADER(GLTYPE, NAME, TYPE) compile_shader_file(GLTYPE, #NAME "." #TYPE)
+#define SHADER(GLTYPE, NAME, TYPE)                                             \
+    compile_shader_file(GLTYPE, "shaders/" #NAME "." #TYPE)
 #endif
 
 #endif

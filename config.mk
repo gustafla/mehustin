@@ -27,5 +27,4 @@ CFLAGS+=-DGL_MAJOR=3 -DGL_MINOR=3 -DGL_PROFILE=CORE
 endif
 
 MODULE_PATH=$(BUILDDIR)/libdemo.so
-
-SHADERS=$(wildcard *.frag) $(wildcard *.vert)
+SHADERS=$(wildcard shaders/*)
