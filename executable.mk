@@ -8,6 +8,7 @@ LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE)) -lm
 
 ifeq ($(DEBUG),0)
 LDLIBS+=-lrocket-player -ldemo
+STRIP=sstrip
 else
 LDLIBS+=-lrocket -ldl
 CFLAGS+=-DDEMO_RTDL -DMODULE_PATH=\"$(MODULE_PATH)\"

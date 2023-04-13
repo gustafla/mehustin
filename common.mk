@@ -2,7 +2,6 @@ OBJS=$(patsubst %.c,%.o,$(SOURCES:src/%=$(BUILDDIR)/%))
 
 # link target
 $(TARGET): $(OBJS)
-	$(info Linking $@)
 	@mkdir -p $(@D)
 	$(CC) -o $(TARGET) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LDLIBS)
 ifeq ($(DEBUG),0)

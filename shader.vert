@@ -1,8 +1,7 @@
-#version 100
-precision mediump float;
+#version 330 core
 
-attribute vec3 a_Pos;
-attribute vec2 a_TexCoord;
+layout (location = 0) in vec3 a_Pos;
+layout (location = 1) in vec2 a_TexCoord;
 
 varying vec3 v_Pos;
 varying vec2 v_TexCoord;

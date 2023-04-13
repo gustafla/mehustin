@@ -8,6 +8,7 @@ LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE) $(PKGS_MODULE)) -lm
 
 ifeq ($(DEBUG),0)
 LDLIBS+=-lrocket-player
+STRIP=sstrip
 else
 LDLIBS+=-lrocket
 endif

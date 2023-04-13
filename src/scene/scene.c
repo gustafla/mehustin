@@ -5,14 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef MONOLITH
-#include "shader_code.h"
-#else
-#define VAR_a_Pos "a_Pos"
-#define VAR_a_TexCoord "a_TexCoord"
+#ifndef MONOLITH
 #define VAR_u_InputSampler "u_InputSampler"
-#define VAR_v_Pos "v_Pos"
-#define VAR_v_TexCoord "v_TexCoord"
 #endif
 
 typedef struct scene_t_ {
@@ -22,10 +16,12 @@ typedef struct scene_t_ {
     int32_t height;
     GLuint program;
     GLuint buffer;
+    GLuint vao;
     GLuint post_fbo;
     GLuint post_fbo_texture;
     GLuint post_program;
     GLuint post_buffer;
+    GLuint post_vao;
 } scene_t;
 
 GLuint link_program(size_t count, GLuint *shaders) {
@@ -51,6 +47,12 @@ GLuint link_program(size_t count, GLuint *shaders) {
 
     return program;
 }
+
+static const GLfloat triangle[] = {-0.5f, -0.5, 0.0, 0.5, -0.5,
+                                   0.0,   0.0,  0.5, 0.0};
+static const GLfloat quad[] = {-1.f, -1., 0., 0., 0., 1.,  -1., 0., 1., 0.,
+                               1.,   1.,  0., 1., 1., -1., -1., 0., 0., 0.,
+                               1.,   1.,  0., 1., 1., -1., 1.,  0., 0., 1.};
 
 void *scene_init(int32_t width, int32_t height,
                  const void *(*gettrack)(const char *),
@@ -81,21 +83,29 @@ void *scene_init(int32_t width, int32_t height,
     scene->post_program =
         link_program(2, (GLuint[]){vertex_shader, post_shader});
 
-    // create buffer for hello triangle
-    float triangle[] = {-0.5f, -0.5, 0.0, 0.5, -0.5, 0.0, 0.0, 0.5, 0.0};
+    // create buffer and va for hello triangle
     glGenBuffers(1, &scene->buffer);
+    glGenVertexArrays(1, &scene->vao);
+    glBindVertexArray(scene->vao);
     glBindBuffer(GL_ARRAY_BUFFER, scene->buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 9, (const GLvoid *)triangle,
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 9, (const GLvoid *)triangle,
                  GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(0);
 
-    // create buffer for post quad
-    float quad[] = {-1.f, -1., 0., 0., 0., 1.,  -1., 0., 1., 0.,
-                    1.,   1.,  0., 1., 1., -1., -1., 0., 0., 0.,
-                    1.,   1.,  0., 1., 1., -1., 1.,  0., 0., 1.};
+    // create buffer and va for post quad
     glGenBuffers(1, &scene->post_buffer);
+    glGenVertexArrays(1, &scene->post_vao);
+    glBindVertexArray(scene->post_vao);
     glBindBuffer(GL_ARRAY_BUFFER, scene->post_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 30, (const GLvoid *)quad,
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 30, (const GLvoid *)quad,
                  GL_STATIC_DRAW);
+    size_t stride = sizeof(GLfloat) * 5;
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride,
+                          (const void *)(sizeof(GLfloat) * 3));
+    glEnableVertexAttribArray(1);
 
     // create post fbo
     glGenFramebuffers(1, &scene->post_fbo);
@@ -118,7 +128,6 @@ void *scene_init(int32_t width, int32_t height,
 void scene_deinit(void *data) { free(data); }
 
 void scene_render(double time, void *data) {
-    GLint pos_attrib, tex_coord_attrib;
     scene_t *scene = data;
 
     // draw test triangle
@@ -126,51 +135,19 @@ void scene_render(double time, void *data) {
     glClearColor(sin(time), 1., 0., 1.);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glBindBuffer(GL_ARRAY_BUFFER, scene->buffer);
-    pos_attrib = glGetAttribLocation(scene->program, VAR_a_Pos);
-    glEnableVertexAttribArray(pos_attrib);
-    glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
     glUseProgram(scene->program);
+    glBindVertexArray(scene->vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     // draw post pass
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, scene->post_fbo_texture);
 
-    glBindBuffer(GL_ARRAY_BUFFER, scene->post_buffer);
-    pos_attrib = glGetAttribLocation(scene->post_program, VAR_a_Pos);
-    tex_coord_attrib = glGetAttribLocation(scene->post_program, VAR_a_TexCoord);
-    size_t stride = sizeof(float) * 5;
-    glEnableVertexAttribArray(pos_attrib);
-    glVertexAttribPointer(pos_attrib, 3, GL_FLOAT, GL_FALSE, stride, NULL);
-    glEnableVertexAttribArray(tex_coord_attrib);
-    glVertexAttribPointer(tex_coord_attrib, 2, GL_FLOAT, GL_FALSE, stride,
-                          (const void *)(sizeof(float) * 3));
-
     glUseProgram(scene->post_program);
     glUniform1i(glGetUniformLocation(scene->post_program, VAR_u_InputSampler),
                 0);
+    glBindVertexArray(scene->post_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-#ifdef DEBUG
-#define CASE(VAL) fprintf(stderr, #VAL "\n");
-    // check opengl errors
-    switch (glGetError()) {
-    case GL_NO_ERROR:
-        break;
-    case GL_INVALID_ENUM:
-        CASE(GL_INVALID_ENUM) break;
-    case GL_INVALID_VALUE:
-        CASE(GL_INVALID_VALUE) break;
-    case GL_INVALID_OPERATION:
-        CASE(GL_INVALID_OPERATION) break;
-    case GL_INVALID_FRAMEBUFFER_OPERATION:
-        CASE(GL_INVALID_FRAMEBUFFER_OPERATION) break;
-    case GL_OUT_OF_MEMORY:
-        CASE(GL_OUT_OF_MEMORY) break;
-    default:
-        fprintf(stderr, "Unknown glGetError() return value\n");
-    }
-#endif
+    // use MESA_DEBUG=1 env to debug
 }
