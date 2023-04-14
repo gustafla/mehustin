@@ -3,7 +3,7 @@ DEBUG?=1
 # debug and release settings
 ifeq ($(DEBUG),0)
 BUILDDIR:=release
-CFLAGS+=-Os -ftree-vectorize -ffast-math -DSYNC_PLAYER
+CFLAGS+=-Os -ftree-vectorize -ffast-math -flto -DSYNC_PLAYER
 else
 BUILDDIR:=debug
 CFLAGS+=-Og -g -DDEBUG
