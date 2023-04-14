@@ -1,5 +1,6 @@
 #include "player.h"
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 inline int min(int a, int b) {
@@ -10,7 +11,7 @@ inline int min(int a, int b) {
 
 static void callback(void *userdata, Uint8 *stream, int len) {
     playback_t *playback = (playback_t *)userdata;
-    bzero(stream, len);
+    memset(stream, 0, len);
     int num_floats = len / sizeof(float);
     if (stb_vorbis_get_samples_float_interleaved(
             playback->vorbis, playback->channels, (float *)stream,
@@ -25,7 +26,7 @@ int player_init(player_t *player, stb_vorbis *vorbis) {
     if (!player)
         return -1;
 
-    bzero(player, sizeof(player_t));
+    memset(player, 0, sizeof(player_t));
 
     if (vorbis) {
         stb_vorbis_info info = stb_vorbis_get_info(vorbis);

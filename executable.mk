@@ -3,7 +3,7 @@ include config.mk
 TARGET:=$(BUILDDIR)/mehustin
 SOURCES=$(wildcard src/base/*.c) lib/stb/stb_vorbis.c
 
-CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE))
+EXTRA_CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE))
 LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE)) -lm
 
 ifeq ($(DEBUG),0)
@@ -11,7 +11,7 @@ LDLIBS+=-lrocket-player -ldemo
 STRIP=sstrip
 else
 LDLIBS+=-lrocket -ldl
-CFLAGS+=-DDEMO_RTDL -DMODULE_PATH=\"$(MODULE_PATH)\"
+EXTRA_CFLAGS+=-DDEMO_RTDL -DMODULE_PATH=\"$(MODULE_PATH)\"
 endif
 
 include common.mk

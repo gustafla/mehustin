@@ -3,8 +3,8 @@ include config.mk
 TARGET=$(MODULE_PATH)
 SOURCES=$(wildcard src/scene/*.c)
 
-CFLAGS+=$(shell pkg-config --cflags $(PKGS_MODULE)) -fPIC
-LDFLAGS+=-shared
+EXTRA_CFLAGS+=$(shell pkg-config --cflags $(PKGS_MODULE)) -fPIC
+EXTRA_LDFLAGS+=-shared
 LDLIBS+=$(shell pkg-config --libs $(PKGS_MODULE))
 
 include common.mk

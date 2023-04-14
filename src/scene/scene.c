@@ -59,6 +59,14 @@ static const GLfloat quad[] = {-1.f, -1., 0., 0., 0., 1.,  -1., 0., 1., 0.,
 void *scene_init(int32_t width, int32_t height,
                  const void *(*gettrack)(const char *),
                  double (*getval)(const void *)) {
+#ifdef __MINGW64__
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+#endif
+
     // set up viewport
     glViewport(0, 0, width, height);
 

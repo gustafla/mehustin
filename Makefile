@@ -11,4 +11,4 @@ monolith:
 	$(MAKE) -f monolithic.mk
 
 clean:
-	rm -rf debug release demo
+	rm -rf debug release

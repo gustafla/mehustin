@@ -1,9 +1,13 @@
 include config.mk
 
+ifeq ($(MINGW),1)
+TARGET=$(BUILDDIR)/demo.exe
+else
 TARGET=$(BUILDDIR)/demo
+endif
 SOURCES=$(wildcard src/base/*.c) $(wildcard src/scene/*.c) lib/stb/stb_vorbis.c
 
-CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE) $(PKGS_MODULE)) -DMONOLITH
+EXTRA_CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE) $(PKGS_MODULE)) -DMONOLITH
 LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE) $(PKGS_MODULE)) -lm
 
 ifeq ($(DEBUG),0)

@@ -23,6 +23,13 @@ For monolithic builds:
 - xxd from vim
 - shader_minifier.exe by Ctrl-Alt-Test
 
+For experimental windows builds in addition to everything above:
+- mingw-w64-gcc
+- mingw-w64-make
+- mingw-w64-pkg-config
+- mingw-w64-sdl2
+- mingw-w64-glew
+
 ## Build instructions
 
 First time setup:
@@ -49,3 +56,9 @@ Release (single executable):
 make DEBUG=0 monolith
 ```
 A release binary will be built (`release/demo`)
+
+Release (Windows 64-bit, experimental):
+```
+./build_windows.sh
+```
+A release directory will be built (directory `demo`)
