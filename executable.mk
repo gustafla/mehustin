@@ -1,7 +1,7 @@
 include config.mk
 
 TARGET:=$(BUILDDIR)/mehustin
-SOURCES=$(wildcard src/base/*.c)
+SOURCES=$(wildcard src/base/*.c) lib/stb/stb_vorbis.c
 
 CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE))
 LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE)) -lm

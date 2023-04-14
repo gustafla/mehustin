@@ -1,5 +1,4 @@
 #include "player.h"
-#include "stb_vorbis.c"
 #include <stdio.h>
 #include <unistd.h>
 
@@ -11,37 +10,32 @@ inline int min(int a, int b) {
 
 static void callback(void *userdata, Uint8 *stream, int len) {
     playback_t *playback = (playback_t *)userdata;
-    // play silence if end is reached
-    memset(stream, 0, len);
-    // only play as much as there is audio data left
-    len = min(len, playback->bytes - playback->pos);
-    // stop here if end reached
-    if (len <= 0)
-        return;
+    bzero(stream, len);
+    int num_floats = len / sizeof(float);
+    if (stb_vorbis_get_samples_float_interleaved(
+            playback->vorbis, playback->channels, (float *)stream,
+            num_floats) == 0) {
+        playback->at_end = 1;
+    }
     // Update precise time
     playback->call_time = SDL_GetTicks();
-    // no mixing needed
-    memcpy(stream, playback->data + playback->pos, len);
-    // update position
-    playback->pos += len;
 }
 
-int player_init(player_t *player, short *audio, int channels, int sample_rate,
-                int samples) {
+int player_init(player_t *player, stb_vorbis *vorbis) {
     if (!player)
         return -1;
 
     bzero(player, sizeof(player_t));
 
-    if (samples > 0) {
-        // cast audio to bytes for playback and compute size in bytes
-        player->playback.data = (Uint8 *)audio; // char* can point to anything
-        player->playback.bytes = samples * channels * sizeof(short);
+    if (vorbis) {
+        stb_vorbis_info info = stb_vorbis_get_info(vorbis);
+        player->playback.vorbis = vorbis;
+        player->playback.channels = info.channels;
 
         // this spec needed to play the file back
-        SDL_AudioSpec desired = {.freq = sample_rate,
-                                 .format = AUDIO_S16SYS,
-                                 .channels = channels,
+        SDL_AudioSpec desired = {.freq = info.sample_rate,
+                                 .format = AUDIO_F32SYS,
+                                 .channels = info.channels,
                                  .samples = 4096,
                                  .callback = callback,
                                  .userdata = (void *)&player->playback};
@@ -53,41 +47,43 @@ int player_init(player_t *player, short *audio, int channels, int sample_rate,
         if (!player->audio_device) {
             fprintf(stderr, "Failed to open audio device:\n%s\n",
                     SDL_GetError());
-            fprintf(stderr, "Starting without audio (end with ESC or q)\n");
-            sleep(2);
         }
+    }
+
+    if (!player->audio_device) {
+        fprintf(stderr, "Starting without audio (end with ESC or q)\n");
+        sleep(2);
     }
 
     return 0;
 }
 
-int player_init_file(player_t *player, const char *vorbis_file_path) {
-    // decode vorbis file
-    short *audio;
-    int channels, sample_rate;
-    int samples = stb_vorbis_decode_filename(vorbis_file_path, &channels,
-                                             &sample_rate, &audio);
-    if (samples < 1) {
-        fprintf(stderr, "Failed to open vorbis file %s\n", vorbis_file_path);
-        fprintf(stderr, "Starting without audio (end with ESC or q)\n");
-        sleep(2);
+int player_init_file(player_t *player, const char *filename) {
+    int error = VORBIS__no_error;
+    stb_vorbis *vorbis = stb_vorbis_open_filename(filename, &error, NULL);
+
+    if (error != VORBIS__no_error) {
+        vorbis = NULL;
+        fprintf(stderr, "Failed to open vorbis file %s\n", filename);
     }
-    return player_init(player, audio, channels, sample_rate, samples);
+
+    return player_init(player, vorbis);
 }
 
-int player_init_memory(player_t *player, const unsigned char *vorbis_file_data,
-                       int len) {
-    // decode vorbis file
-    short *audio;
-    int channels, sample_rate;
-    int samples = stb_vorbis_decode_memory(vorbis_file_data, len, &channels,
-                                           &sample_rate, &audio);
-    return player_init(player, audio, channels, sample_rate, samples);
+int player_init_memory(player_t *player, const unsigned char *data, int len) {
+    int error = VORBIS__no_error;
+    stb_vorbis *vorbis = stb_vorbis_open_memory(data, len, &error, NULL);
+
+    if (error != VORBIS__no_error) {
+        return -1;
+    }
+
+    return player_init(player, vorbis);
 }
 
 int player_at_end(player_t *player) {
     if (player->audio_device) {
-        return player->playback.pos >= player->playback.bytes;
+        return player->playback.at_end;
     }
 
     return 0;
@@ -107,16 +103,15 @@ double player_get_time(player_t *player) {
 
     if (player->audio_device) {
         SDL_LockAudioDevice(player->audio_device);
-        double byte_at = player->playback.pos;
+        double sample = stb_vorbis_get_sample_offset(player->playback.vorbis);
         SDL_UnlockAudioDevice(player->audio_device);
-        time = byte_at / player->spec.channels / sizeof(Uint16) /
-               player->spec.freq;
+        time = sample / player->spec.freq;
     } else {
-        time = player->set_time;
+        time = player->time;
     }
 
     // add precision
-    if (player_is_playing(player)) {
+    if (player_is_playing(player) && !player_at_end(player)) {
         time += (SDL_GetTicks() - player->playback.call_time) / 1000.;
     }
 
@@ -125,12 +120,10 @@ double player_get_time(player_t *player) {
 
 void player_pause(player_t *player, int flag) {
     if (player->audio_device) {
-        SDL_LockAudioDevice(player->audio_device);
         player->playback.call_time = SDL_GetTicks();
-        SDL_UnlockAudioDevice(player->audio_device);
         SDL_PauseAudioDevice(player->audio_device, flag);
     } else {
-        player->set_time = player_get_time(player);
+        player->time = player_get_time(player);
         player->playback.call_time = SDL_GetTicks();
         player->playing = !flag;
     }
@@ -138,17 +131,13 @@ void player_pause(player_t *player, int flag) {
 
 void player_set_time(player_t *player, double time) {
     if (player->audio_device) {
-        // desired time to byte
-        size_t pos =
-            time * player->spec.channels * sizeof(Uint16) * player->spec.freq;
-        // align byte position to first byte of left sample
-        pos -= pos % (player->spec.channels * sizeof(Uint16));
-        // update player position
+        size_t sample = time * player->spec.freq;
         SDL_LockAudioDevice(player->audio_device);
-        player->playback.pos = pos;
+        stb_vorbis_seek(player->playback.vorbis, sample);
+        player->playback.at_end = 0;
         SDL_UnlockAudioDevice(player->audio_device);
     } else {
-        player->set_time = time;
+        player->time = time;
         player->playback.call_time = SDL_GetTicks();
     }
 }
@@ -157,7 +146,7 @@ void player_destroy(player_t *player) {
     if (player->audio_device) {
         SDL_CloseAudioDevice(player->audio_device);
     }
-    if (player->playback.data) {
-        free(player->playback.data);
+    if (player->playback.vorbis) {
+        stb_vorbis_close(player->playback.vorbis);
     }
 }

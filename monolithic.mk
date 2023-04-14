@@ -1,7 +1,7 @@
 include config.mk
 
 TARGET=$(BUILDDIR)/demo
-SOURCES=$(wildcard src/base/*.c) $(wildcard src/scene/*.c)
+SOURCES=$(wildcard src/base/*.c) $(wildcard src/scene/*.c) lib/stb/stb_vorbis.c
 
 CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE) $(PKGS_MODULE)) -DMONOLITH
 LDLIBS+=$(shell pkg-config --libs $(PKGS_EXECUTABLE) $(PKGS_MODULE)) -lm

@@ -1,4 +1,4 @@
-OBJS=$(patsubst %.c,%.o,$(SOURCES:src/%=$(BUILDDIR)/%))
+OBJS=$(patsubst %.c,%.o,$(SOURCES:%=$(BUILDDIR)/%))
 
 # link target
 $(TARGET): $(OBJS)
@@ -9,6 +9,6 @@ ifeq ($(DEBUG),0)
 endif
 
 # compile target
-$(BUILDDIR)/%.o: src/%.c
+$(BUILDDIR)/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $<

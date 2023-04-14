@@ -1,12 +1,14 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#define STB_VORBIS_HEADER_ONLY
+#include "stb_vorbis.c"
 #include <SDL.h>
 
 typedef struct {
-    Uint8 *data;
-    size_t bytes;
-    size_t pos;
+    stb_vorbis *vorbis;
+    int channels;
+    int at_end;
     unsigned call_time;
 } playback_t;
 
@@ -14,8 +16,8 @@ typedef struct {
     SDL_AudioDeviceID audio_device;
     SDL_AudioSpec spec;
     playback_t playback;
-    double set_time; // Used if cannot actually output audio
-    int playing;     // Used if cannot actually output audio
+    double time; // Used if cannot actually output audio
+    int playing; // Used if cannot actually output audio
 } player_t;
 
 int player_init_file(player_t *, const char *);
