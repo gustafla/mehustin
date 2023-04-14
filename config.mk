@@ -33,5 +33,9 @@ endif
 EXTRA_CFLAGS+=-DGL_MAJOR=3 -DGL_MINOR=3 -DGL_PROFILE=CORE
 endif
 
+ifeq ($(MINGW),1)
+MODULE_PATH=$(BUILDDIR)/libdemo.dll
+else
 MODULE_PATH=$(BUILDDIR)/libdemo.so
+endif
 SHADERS=$(wildcard shaders/*)

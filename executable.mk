@@ -1,6 +1,13 @@
 include config.mk
 
-TARGET:=$(BUILDDIR)/mehustin
+ifeq ($(MINGW),1)
+TARGET=$(BUILDDIR)/mehustin.exe
+RUNSCR=src/run.bat
+else
+TARGET=$(BUILDDIR)/mehustin
+RUNSCR=src/run.sh
+endif
+
 SOURCES=$(wildcard src/base/*.c) lib/stb/stb_vorbis.c
 
 EXTRA_CFLAGS+=$(shell pkg-config --cflags $(PKGS_EXECUTABLE))
@@ -18,10 +25,10 @@ include common.mk
 
 .PHONY: install
 
-install: $(TARGET) LICENSE src/demo.sh
+install: $(TARGET) LICENSE $(RUNSCR)
 	cp $(TARGET) $(PREFIX)/bin/
 	cp LICENSE $(PREFIX)/
-	cp src/demo.sh $(PREFIX)/
+	cp $(RUNSCR) $(PREFIX)/
 	-git clone ./ $(PREFIX)/src
 	-cd $(PREFIX)/src; rm -rf .git
 
