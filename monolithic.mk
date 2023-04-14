@@ -42,3 +42,13 @@ $(BUILDDIR)/sync_tracks.h: $(wildcard *.track)
 
 
 include common.mk
+
+.PHONY: install
+
+install: $(TARGET) LICENSE
+	-mkdir -p $(PREFIX)
+	cp $(TARGET) $(PREFIX)
+	cp LICENSE $(PREFIX)
+	-git clone ./ $(PREFIX)/src
+	-cd $(PREFIX)/src; rm -rf .git
+
