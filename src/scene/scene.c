@@ -7,11 +7,13 @@
 
 #ifndef MONOLITH
 #define VAR_u_InputSampler "u_InputSampler"
+#define VAR_u_Brightness "u_Brightness"
 #endif
 
 typedef struct scene_t_ {
     double (*get_value)(const void *);
     const void *(*get_track)(const char *);
+    const void *tr_brightness;
     int32_t width;
     int32_t height;
     GLuint program;
@@ -65,6 +67,9 @@ void *scene_init(int32_t width, int32_t height,
     scene->get_track = gettrack;
     scene->width = width;
     scene->height = height;
+
+    // brightness track
+    scene->tr_brightness = gettrack("post:brightness");
 
     // load vertex shader
     GLuint vertex_shader = SHADER(GL_VERTEX_SHADER, shader, vert);
@@ -146,6 +151,8 @@ void scene_render(double time, void *data) {
     glUseProgram(scene->post_program);
     glUniform1i(glGetUniformLocation(scene->post_program, VAR_u_InputSampler),
                 0);
+    glUniform1f(glGetUniformLocation(scene->post_program, VAR_u_Brightness),
+                scene->get_value(scene->tr_brightness));
     glBindVertexArray(scene->post_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
