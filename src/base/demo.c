@@ -1,5 +1,3 @@
-#define _POSIX_C_SOURCE 200809L
-
 #include "demo.h"
 #include "sync.h"
 #include <SDL.h>
@@ -53,14 +51,21 @@ static struct sync_cb player_cb = {
 };
 #else
 #ifdef MONOLITH
-#include "sync_tracks.h"
+#include "sync_tracks.h" // sync_track_filenames, sync_track_data, sync_track_lens
 void *rocket_open(const char *filename, const char *mode) {
     const char *str = sync_track_filenames;
     for (size_t i = 0; str[0] /* string not empty */; i++) {
         if (strcmp(str, filename) == 0) {
-            return fmemopen((void *)sync_track_data[i], sync_track_lens[i],
-                            mode);
+            const unsigned char *data = sync_track_data[i];
+            const size_t len = sync_track_lens[i];
+
+            // If writing tmpfile fails, it's not my fault. No error handling.
+            FILE *tmp = tmpfile();
+            fwrite(data, 1, len, tmp);
+            rewind(tmp);
+            return tmp;
         }
+
         str = strchr(str, 0) + 1;
     }
 
@@ -71,8 +76,8 @@ static struct sync_io_cb iocb = {
     .open = rocket_open,
     .read = (size_t(*)(void *, size_t, size_t, void *))fread,
     .close = (int (*)(void *))fclose};
-#endif // defined(MONOLITH)
-#endif // !defined(SYNC_PLAYER)
+#endif                   // defined(MONOLITH)
+#endif                   // !defined(SYNC_PLAYER)
 
 int demo_init(player_t *player, int width, int height, double bpm, double rpb) {
     // init rocket
