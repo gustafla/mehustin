@@ -1,5 +1,6 @@
 #include "demo.h"
 #include "sync.h"
+#include "sync_io.h"
 #include <SDL.h>
 #include <stdint.h>
 #include <unistd.h>
@@ -49,35 +50,7 @@ static struct sync_cb player_cb = {
     player_set_row,                      // demo.c
     (int (*)(void *))player_is_playing   // player.c
 };
-#else
-#ifdef MONOLITH
-#include "sync_tracks.h" // sync_track_filenames, sync_track_data, sync_track_lens
-void *rocket_open(const char *filename, const char *mode) {
-    const char *str = sync_track_filenames;
-    for (size_t i = 0; str[0] /* string not empty */; i++) {
-        if (strcmp(str, filename) == 0) {
-            const unsigned char *data = sync_track_data[i];
-            const size_t len = sync_track_lens[i];
-
-            // If writing tmpfile fails, it's not my fault. No error handling.
-            FILE *tmp = tmpfile();
-            fwrite(data, 1, len, tmp);
-            rewind(tmp);
-            return tmp;
-        }
-
-        str = strchr(str, 0) + 1;
-    }
-
-    return NULL;
-}
-
-static struct sync_io_cb iocb = {
-    .open = rocket_open,
-    .read = (size_t(*)(void *, size_t, size_t, void *))fread,
-    .close = (int (*)(void *))fclose};
-#endif                   // defined(MONOLITH)
-#endif                   // !defined(SYNC_PLAYER)
+#endif // !defined(SYNC_PLAYER)
 
 int demo_init(player_t *player, int width, int height, double bpm, double rpb) {
     // init rocket
@@ -88,17 +61,16 @@ int demo_init(player_t *player, int width, int height, double bpm, double rpb) {
         return EXIT_FAILURE;
     }
 
-#ifndef SYNC_PLAYER
+#ifdef SYNC_PLAYER
+    // Set rocket file io callback (sync_io.h)
+    sync_set_io_cb(demo.rocket, &rocket_iocb);
+#else  // !defined(SYNC_PLAYER)
     // connect rocket
     while (sync_tcp_connect(demo.rocket, "localhost", SYNC_DEFAULT_PORT)) {
         printf("Waiting for Rocket editor...\n");
         sleep(2);
     }
-#else
-#ifdef MONOLITH
-    sync_set_io_cb(demo.rocket, &iocb);
-#endif // defined(MONOLITH)
-#endif // !defined(SYNC_PLAYER)
+#endif // defined(SYNC_PLAYER)
 
     // store resolution
     demo.width = width;
