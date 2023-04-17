@@ -6,7 +6,7 @@ BASE=.
 CC=gcc
 STRIP=strip --strip-all
 CFLAGS=-std=c99 -Wall -Wextra -Wpedantic
-EXTRA_CFLAGS=-I$(BASE) -I$(BASE)/lib/stb -I$(BASE)/lib/rocket/lib -I$(BUILDDIR)
+EXTRA_CFLAGS=-I$(BASE)/src -I$(BASE)/lib/stb -I$(BASE)/lib/rocket/lib -I$(BUILDDIR)
 EXTRA_LDFLAGS=-L$(BASE)/lib/rocket/lib -L$(BASE)/$(BUILDDIR)
 
 # debug and release settings

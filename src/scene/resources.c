@@ -69,3 +69,27 @@ GLuint compile_shader_file(GLenum shader_type, const char *path) {
 
     return shader;
 }
+
+GLuint link_program(size_t count, GLuint *shaders) {
+    GLuint program = glCreateProgram();
+
+    for (size_t i = 0; i < count; i++) {
+        glAttachShader(program, shaders[i]);
+    }
+
+    glLinkProgram(program);
+
+    GLint status;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if (status == GL_FALSE) {
+        GLint log_len;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_len);
+        GLchar *log = malloc(sizeof(GLchar) * log_len);
+        glGetProgramInfoLog(program, log_len, NULL, log);
+        fprintf(stderr, "Program linking failed.\n%s\n", log);
+        free(log);
+        return 0;
+    }
+
+    return program;
+}
