@@ -15,6 +15,7 @@
 #define VAR_u_PerlinSampler "u_PerlinSampler"
 #define VAR_u_RandSampler "u_RandSampler"
 #define VAR_u_Brightness "u_Brightness"
+#define VAR_u_NoiseScale "u_NoiseScale"
 #endif
 
 typedef struct tracks_t_ {
@@ -26,6 +27,8 @@ void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
     tracks->brightness = gettrack("post:brightness");
     tracks->noisetime = gettrack("post:noisetime");
 }
+
+#define NOISE_SIZE 256
 
 typedef struct post_t_ {
     GLsizei width;
@@ -86,17 +89,17 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
     // Create textures and buffer for noise
     glGenTextures(2, post->noise);
     glBindTexture(GL_TEXTURE_2D, post->noise[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT,
-                 NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, NOISE_SIZE, NOISE_SIZE, 0, GL_RED,
+                 GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, post->noise[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, NOISE_SIZE, NOISE_SIZE, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     // Enough for rgba 8-bit and r 32-bit
-    post->noise_buffer = malloc(width * height * sizeof(GLfloat));
+    post->noise_buffer = malloc(NOISE_SIZE * NOISE_SIZE * 4);
 }
 
 void post_deinit(post_t *post) { free(post->noise_buffer); }
@@ -105,26 +108,27 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     // Create perlin noise
     float z = get_value(tr->noisetime);
     float *perlin = post->noise_buffer;
-    for (GLsizei i = 0; i < post->height * post->width; i++) {
-        float y = i / (float)post->width;
-        float x = i % post->width;
-        x /= 3.;
-        y /= 3.;
-        perlin[i] = stb_perlin_noise3(x, y, z, 0, 0, 0);
+    for (GLsizei i = 0; i < NOISE_SIZE * NOISE_SIZE; i++) {
+        float y = i / (float)NOISE_SIZE;
+        float x = i % NOISE_SIZE;
+        x /= 4.;
+        y /= 4.;
+        perlin[i] =
+            stb_perlin_noise3(x, y, z, NOISE_SIZE / 4, NOISE_SIZE / 4, 0);
     }
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, post->noise[0]);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, post->width, post->height, GL_RED,
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, NOISE_SIZE, NOISE_SIZE, GL_RED,
                     GL_FLOAT, perlin);
 
     // Create rand noise
     unsigned char *noise = post->noise_buffer;
-    for (GLsizei i = 0; i < post->height * post->width * 4; i++) {
+    for (GLsizei i = 0; i < NOISE_SIZE * NOISE_SIZE * 4; i++) {
         noise[i] = rand_xoshiro();
     }
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, post->noise[1]);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, post->width, post->height, GL_RGBA,
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, NOISE_SIZE, NOISE_SIZE, GL_RGBA,
                     GL_UNSIGNED_BYTE, noise);
 
     // Bind other stuff
@@ -138,6 +142,9 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     glUniform1i(glGetUniformLocation(post->program, VAR_u_RandSampler), 2);
     glUniform1f(glGetUniformLocation(post->program, VAR_u_Brightness),
                 get_value(tr->brightness));
+    glUniform2f(glGetUniformLocation(post->program, VAR_u_NoiseScale),
+                post->width / (float)NOISE_SIZE,
+                post->height / (float)NOISE_SIZE);
     glBindVertexArray(post->vao);
 
     // Draw screen quad
