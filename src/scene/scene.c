@@ -133,6 +133,8 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
 
     // Bind other stuff
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(0, 0, 0, 1.);
+    glClear(GL_COLOR_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, post->fbo_texture);
 
