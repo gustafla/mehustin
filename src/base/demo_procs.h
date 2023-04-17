@@ -28,7 +28,10 @@ int procs_reload(void);
 #else
 #include "scene/scene.h"
 #define SCENE_INIT scene_init
-#define SCENE_DEINIT scene_deinit
+#define SCENE_DEINIT(data)                                                     \
+    if (data) {                                                                \
+        scene_deinit(data);                                                    \
+    }
 #define SCENE_RENDER scene_render
 #endif // defined(DEMO_RTDL)
 #endif // !defined(DEMO_PROCS_H)

@@ -102,7 +102,11 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
     post->noise_buffer = malloc(NOISE_SIZE * NOISE_SIZE * 4);
 }
 
-void post_deinit(post_t *post) { free(post->noise_buffer); }
+void post_deinit(post_t *post) {
+    if (post) {
+        free(post->noise_buffer);
+    }
+}
 
 void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     // Create perlin noise
@@ -213,9 +217,11 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
 }
 
 void scene_deinit(void *data) {
-    scene_t *scene = data;
-    post_deinit(&scene->post);
-    free(scene);
+    if (data) {
+        scene_t *scene = data;
+        post_deinit(&scene->post);
+        free(scene);
+    }
 }
 
 void scene_render(double time, void *data) {
