@@ -13,12 +13,26 @@ uniform vec2 u_NoiseScale;
 
 #define PI 3.14159265
 
+float pattern(vec2 uv, float freq) {
+    float f = freq * PI * 2.;
+    return sin(uv.x * f) * sin(uv.y * f);
+}
+
 float edge_pattern(vec2 uv, float freq, float grad) {
-    float f = freq * PI;
-    float pattern = sin(uv.x * f) * sin(uv.y * f) + 2.;
+    float pattern = pattern(uv, freq) + 2.;
     pattern *= sin(uv.x * PI) * grad;
     pattern *= sin(uv.y * PI) * grad;
     return clamp(pattern, 0. ,1.);
+}
+
+vec3 rgb_pattern(vec2 uv, float freq) {
+    vec3 pattern = vec3(
+        sin(uv.x * PI * 2. * freq),
+        sin(((uv.x * PI * 2.) + (PI * 2)/3) * freq),
+        sin(((uv.x * PI * 2.) + (PI * 4)/3) * freq));
+    pattern = clamp(pattern, 0. ,1.);
+    pattern *= clamp(sin(uv.y * PI * 4. * freq + floor(uv.x * PI * freq) * PI) * 2. + 2.3, 0., 1.);
+    return clamp(pattern, 0., 1.);
 }
 
 void main() {
@@ -48,6 +62,9 @@ void main() {
 
     // Add texture to screen edges
     color *= edge_pattern(distor, 300., 3.5);
+
+    // Add rgb pattern
+    color *= rgb_pattern(distor, 600.) * 0.2 + 0.8;
 
     FragColor = vec4(color + vec3(u_Brightness), 1.);
 }
