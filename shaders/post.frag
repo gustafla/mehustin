@@ -9,7 +9,8 @@ uniform sampler2D u_InputSampler;
 uniform sampler2D u_PerlinSampler;
 uniform sampler2D u_RandSampler;
 uniform float u_Brightness;
-uniform vec2 u_NoiseScale;
+uniform float u_NoiseSize;
+uniform vec2 u_Resolution;
 
 #define PI 3.14159265
 
@@ -25,13 +26,11 @@ float edge_pattern(vec2 uv, float freq, float grad) {
     return clamp(pattern, 0. ,1.);
 }
 
-vec3 rgb_pattern(vec2 uv, float freq) {
+vec3 rgb_pattern(vec2 uv, vec2 freq) {
     vec3 pattern = vec3(
-        sin(uv.x * PI * 2. * freq),
-        sin(((uv.x * PI * 2.) + (PI * 2)/3) * freq),
-        sin(((uv.x * PI * 2.) + (PI * 4)/3) * freq));
-    pattern = clamp(pattern, 0. ,1.);
-    pattern *= clamp(sin(uv.y * PI * 4. * freq + floor(uv.x * PI * freq) * PI) * 2. + 2.3, 0., 1.);
+        sin(uv.x * PI * 2. * freq.x),
+        sin(uv.x * PI * 2. * freq.x + (PI * 2. / 3)),
+        sin(uv.x * PI * 2. * freq.x + (PI * 2. / 3) * 2));
     return clamp(pattern, 0., 1.);
 }
 
@@ -42,15 +41,12 @@ void main() {
             1. + abs(center.y * center.y) * 0.1,
             1. + abs(center.x * center.x) * 0.2) + vec2(0.5);
 
-    if (distor.x < 0. || distor.x > 1. || distor.y < 0. || distor.y > 1.) {
-        discard; // Hide "overscan" at edges
-    }
-
     // Input color
     vec3 color = texture2D(u_InputSampler, distor).rgb;
 
     // Add perlin and random rgb noises
-    vec2 noise_coord = v_TexCoord * u_NoiseScale;
+    vec2 noise_scale = u_Resolution / u_NoiseSize;
+    vec2 noise_coord = v_TexCoord * noise_scale;
     float noise_perlin = texture2D(u_PerlinSampler, noise_coord).r;
     vec3 noise_rand = texture2D(u_RandSampler, noise_coord).rgb;
     vec3 noise = noise_perlin * 0.02 + noise_rand * 0.06;
@@ -63,8 +59,10 @@ void main() {
     // Add texture to screen edges
     color *= edge_pattern(distor, 300., 3.5);
 
-    // Add rgb pattern
-    color *= rgb_pattern(distor, 600.) * 0.2 + 0.8;
+    // Add rgb pattern and scanlines
+    vec2 freq = vec2(u_Resolution.x / 3.2, u_Resolution.y / 2.4);
+    color *= rgb_pattern(distor, freq) * 0.2 + 0.8;
+    color *= mod(gl_FragCoord.y, 2.) * 0.1 + 0.9;
 
     FragColor = vec4(color + vec3(u_Brightness), 1.);
 }

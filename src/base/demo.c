@@ -103,7 +103,7 @@ void demo_render(void) {
     }
 #endif
 
-    SCENE_RENDER(demo.time, demo.scene_data);
+    SCENE_RENDER(demo.scene_data, demo.time);
 }
 
 int demo_reload(void) {
@@ -122,6 +122,10 @@ int demo_reload(void) {
     }
 
     return EXIT_SUCCESS;
+}
+
+void demo_resize(int width, int height) {
+    SCENE_RESIZE(demo.scene_data, width, height);
 }
 
 double demo_sync_get_value(const void *track) {

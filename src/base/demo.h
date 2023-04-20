@@ -9,6 +9,7 @@ int demo_init(player_t *player, int width, int height, double bpm, double rpb);
 void demo_deinit(void);
 void demo_render(void);
 int demo_reload(void);
+void demo_resize(int width, int height);
 const void *demo_sync_get_track(const char *);
 double demo_sync_get_value(const void *);
 

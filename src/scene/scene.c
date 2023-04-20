@@ -15,7 +15,8 @@
 #define VAR_u_PerlinSampler "u_PerlinSampler"
 #define VAR_u_RandSampler "u_RandSampler"
 #define VAR_u_Brightness "u_Brightness"
-#define VAR_u_NoiseScale "u_NoiseScale"
+#define VAR_u_NoiseSize "u_NoiseSize"
+#define VAR_u_Resolution "u_Resolution"
 #endif
 
 typedef struct tracks_t_ {
@@ -25,7 +26,6 @@ typedef struct tracks_t_ {
 
 void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
     tracks->brightness = gettrack("post:brightness");
-    tracks->noisetime = gettrack("post:noisetime");
 }
 
 #define NOISE_SIZE 256
@@ -87,30 +87,9 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
     glEnableVertexAttribArray(1);
 
     // Create textures and buffer for noise
-    glGenTextures(2, post->noise);
-    glBindTexture(GL_TEXTURE_2D, post->noise[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, NOISE_SIZE, NOISE_SIZE, 0, GL_RED,
-                 GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, post->noise[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, NOISE_SIZE, NOISE_SIZE, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     // Enough for rgba 8-bit and r 32-bit
     post->noise_buffer = malloc(NOISE_SIZE * NOISE_SIZE * 4);
-}
-
-void post_deinit(post_t *post) {
-    if (post) {
-        free(post->noise_buffer);
-    }
-}
-
-void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
-    // Create perlin noise
-    float z = get_value(tr->noisetime);
+    float z = 0.4;
     float *perlin = post->noise_buffer;
     for (GLsizei i = 0; i < NOISE_SIZE * NOISE_SIZE; i++) {
         float y = i / (float)NOISE_SIZE;
@@ -120,10 +99,31 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
         perlin[i] =
             stb_perlin_noise3(x, y, z, NOISE_SIZE / 4, NOISE_SIZE / 4, 0);
     }
+    glGenTextures(2, post->noise);
+    glBindTexture(GL_TEXTURE_2D, post->noise[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, NOISE_SIZE, NOISE_SIZE, 0, GL_RED,
+                 GL_FLOAT, perlin);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, post->noise[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, NOISE_SIZE, NOISE_SIZE, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void post_deinit(post_t *post) {
+    if (post) {
+        free(post->noise_buffer);
+    }
+}
+
+void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
+    glViewport(0, 0, post->width, post->height);
+
+    // Bind perlin noise
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, post->noise[0]);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, NOISE_SIZE, NOISE_SIZE, GL_RED,
-                    GL_FLOAT, perlin);
 
     // Create rand noise
     unsigned char *noise = post->noise_buffer;
@@ -148,13 +148,19 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     glUniform1i(glGetUniformLocation(post->program, VAR_u_RandSampler), 2);
     glUniform1f(glGetUniformLocation(post->program, VAR_u_Brightness),
                 get_value(tr->brightness));
-    glUniform2f(glGetUniformLocation(post->program, VAR_u_NoiseScale),
-                post->width / (float)NOISE_SIZE,
-                post->height / (float)NOISE_SIZE);
+    glUniform1f(glGetUniformLocation(post->program, VAR_u_NoiseSize),
+                NOISE_SIZE);
+    glUniform2f(glGetUniformLocation(post->program, VAR_u_Resolution),
+                post->width, post->height);
     glBindVertexArray(post->vao);
 
     // Draw screen quad
     glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void post_resize(post_t *post, uint32_t width, uint32_t height) {
+    post->width = width;
+    post->height = height;
 }
 
 typedef struct scene_t_ {
@@ -216,6 +222,11 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
     return scene;
 }
 
+void scene_resize(void *data, uint32_t width, uint32_t height) {
+    scene_t *scene = data;
+    post_resize(&scene->post, width, height);
+}
+
 void scene_deinit(void *data) {
     if (data) {
         scene_t *scene = data;
@@ -224,8 +235,9 @@ void scene_deinit(void *data) {
     }
 }
 
-void scene_render(double time, void *data) {
+void scene_render(void *data, double time) {
     scene_t *scene = data;
+    glViewport(0, 0, scene->width, scene->height);
 
     // draw test triangle
     glBindFramebuffer(GL_FRAMEBUFFER, scene->post.fbo);

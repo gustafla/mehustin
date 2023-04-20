@@ -102,7 +102,8 @@ int main(int argc, char *argv[]) {
     SDL_Window *window = SDL_CreateWindow(
         (optind < argc ? argv[optind] : "-"), SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED, width, height,
-        SDL_WINDOW_OPENGL | (fs ? SDL_WINDOW_FULLSCREEN : 0));
+        SDL_WINDOW_OPENGL | (fs ? SDL_WINDOW_FULLSCREEN : 0) |
+            SDL_WINDOW_RESIZABLE);
     if (!window) {
         fprintf(stderr, "SDL2 failed to initialize a window: %s\n",
                 SDL_GetError());
@@ -130,6 +131,7 @@ int main(int argc, char *argv[]) {
     }
 
     SDL_Event e;
+    int running = 1;
 
     // Set up frame rate counting
 #ifdef DEBUG
@@ -137,34 +139,40 @@ int main(int argc, char *argv[]) {
     unsigned frames = 0;
     unsigned time = SDL_GetTicks();
 #endif
-#ifdef DEBUG
-    while (1) {
-#else
-    while (!player_at_end(&player)) {
+
+    while (running) {
+#ifndef DEBUG
+        running = !player_at_end(&player);
 #endif
+
         // get sdl events like keyboard or kill signals
-        SDL_PollEvent(&e);
-        if (e.type == SDL_QUIT) {
-            break;
-        } else if (e.type == SDL_KEYDOWN) {
-            if (e.key.keysym.sym == SDLK_ESCAPE || e.key.keysym.sym == SDLK_q) {
-                break;
-            }
+        while (SDL_PollEvent(&e)) {
+            if (e.type == SDL_QUIT) {
+                running = 0;
+            } else if (e.type == SDL_KEYDOWN) {
+                if (e.key.keysym.sym == SDLK_ESCAPE ||
+                    e.key.keysym.sym == SDLK_q) {
+                    running = 0;
+                }
 #ifdef DEBUG
-            else if (e.key.keysym.sym == SDLK_r) {
-                if (demo_reload()) {
-                    break;
+                else if (e.key.keysym.sym == SDLK_r) {
+                    if (demo_reload()) {
+                        running = 0;
+                    }
+                }
+#endif
+            } else if (e.type == SDL_WINDOWEVENT) {
+                if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                    demo_resize(e.window.data1, e.window.data2);
                 }
             }
-#endif
         }
 
         // render and show to screen
         demo_render();
         SDL_GL_SwapWindow(window);
 
-        // handle frame rate counting
-#ifdef DEBUG
+#ifdef DEBUG // handle frame rate counting
         frames++;
         unsigned newtime = SDL_GetTicks();
         if (newtime >= time + FRAME_RATE_INTERVAL) {

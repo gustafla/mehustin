@@ -7,6 +7,7 @@ void *scene_init(int32_t width, int32_t height,
                  const void *(*gettrack)(const char *),
                  double (*getval)(const void *));
 void scene_deinit(void *data);
-void scene_render(double time, void *data);
+void scene_render(void *data, double time);
+void scene_resize(void *data, uint32_t width, uint32_t height);
 
 #endif

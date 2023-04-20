@@ -10,6 +10,13 @@ procs_t procs;
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define LOAD_PROC(name)                                                        \
+    if (!(*(void **)(&procs.name) = dlsym(procs.module, #name))) {             \
+        fprintf(stderr, "Can't load %s from module\n", #name);                 \
+        dlclose(procs.module);                                                 \
+        return EXIT_FAILURE;                                                   \
+    }
+
 void procs_deinit(void) {
     if (procs.module) {
         dlclose(procs.module);
@@ -44,14 +51,10 @@ int procs_reload(void) {
     unlink(tmp_file_path);
 
     // load scene api
-    *(void **)(&procs.scene_init) = dlsym(procs.module, "scene_init");
-    *(void **)(&procs.scene_deinit) = dlsym(procs.module, "scene_deinit");
-    *(void **)(&procs.scene_render) = dlsym(procs.module, "scene_render");
-    if (!procs.scene_init || !procs.scene_deinit || !procs.scene_render) {
-        fprintf(stderr, "Can't load symbols from module\n");
-        dlclose(procs.module);
-        return EXIT_FAILURE;
-    }
+    LOAD_PROC(scene_init);
+    LOAD_PROC(scene_deinit);
+    LOAD_PROC(scene_render);
+    LOAD_PROC(scene_resize);
 
     printf("Scene module loaded\n");
     return EXIT_SUCCESS;
