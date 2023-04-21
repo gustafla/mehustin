@@ -21,7 +21,6 @@
 
 typedef struct tracks_t_ {
     const void *brightness;
-    const void *noisetime;
 } tracks_t;
 
 void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
@@ -31,8 +30,11 @@ void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
 #define NOISE_SIZE 256
 
 typedef struct post_t_ {
+    GLsizei x;
+    GLsizei y;
     GLsizei width;
     GLsizei height;
+    float aspect_ratio;
     GLuint fbo;
     GLuint fbo_texture;
     GLuint program;
@@ -48,8 +50,11 @@ static const GLfloat quad[] = {-1.f, -1., 0., 0., 0., 1.,  -1., 0., 1., 0.,
 
 void post_init(post_t *post, GLsizei width, GLsizei height,
                GLuint vertex_shader) {
+    post->x = 0;
+    post->y = 0;
     post->width = width;
     post->height = height;
+    post->aspect_ratio = (float)width / (float)height;
 
     // create post->fbo
     glGenFramebuffers(1, &post->fbo);
@@ -58,8 +63,8 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
     glBindTexture(GL_TEXTURE_2D, post->fbo_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
                  GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                            post->fbo_texture, 0);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -119,7 +124,7 @@ void post_deinit(post_t *post) {
 }
 
 void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
-    glViewport(0, 0, post->width, post->height);
+    glViewport(post->x, post->y, post->width, post->height);
 
     // Bind perlin noise
     glActiveTexture(GL_TEXTURE1);
@@ -159,8 +164,19 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
 }
 
 void post_resize(post_t *post, uint32_t width, uint32_t height) {
-    post->width = width;
-    post->height = height;
+    if ((float)width / (float)height > post->aspect_ratio) {
+        // new window has greater width than internal size
+        post->height = height;
+        post->width = height * post->aspect_ratio;
+        post->y = 0;
+        post->x = (width - post->width) / 2;
+    } else {
+        // new window has greater height than internal size
+        post->width = width;
+        post->height = width / post->aspect_ratio;
+        post->x = 0;
+        post->y = (height - post->height) / 2;
+    }
 }
 
 typedef struct scene_t_ {
