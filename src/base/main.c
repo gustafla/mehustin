@@ -97,6 +97,8 @@ int main(int argc, char *argv[]) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, gl);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 
     // get an opengl window
     SDL_Window *window = SDL_CreateWindow(
@@ -123,6 +125,12 @@ int main(int argc, char *argv[]) {
                 SDL_GetError());
         return EXIT_FAILURE;
     }
+
+    SDL_GL_GetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, &ret);
+    if (!ret) {
+        fprintf(stderr, "No sRGB framebuffer\n");
+    }
+    ret = 0;
 
     // connect/init rocket and prepare demo for rendering
     if (demo_init(&player, width, height, bpm, rpb)) {
