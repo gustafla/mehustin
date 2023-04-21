@@ -5,6 +5,7 @@
 #include "gl.h"
 #include "rand.h"
 #include "resources.h"
+#include "screen_pass.h"
 #include "stb_perlin.h"
 #include <math.h>
 #include <stdio.h>
@@ -35,9 +36,8 @@ typedef struct post_t_ {
     GLsizei width;
     GLsizei height;
     float aspect_ratio;
-    GLuint fbo;
-    GLuint fbo_texture;
-    GLuint program;
+    pass_fbo_t fbo;
+    pass_t pass;
     GLuint buffer;
     GLuint vao;
     GLuint noise[2];
@@ -57,25 +57,11 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
     post->aspect_ratio = (float)width / (float)height;
 
     // create post->fbo
-    glGenFramebuffers(1, &post->fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, post->fbo);
-    glGenTextures(1, &post->fbo_texture);
-    glBindTexture(GL_TEXTURE_2D, post->fbo_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                           post->fbo_texture, 0);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        fprintf(stderr, "FBO not complete\n");
-    }
+    pass_fbo_init(&post->fbo, width, height);
 
-    // load post fragment shader
-    GLuint post_shader = SHADER(GL_FRAGMENT_SHADER, post, frag);
-
-    // create post program
-    post->program = link_program(2, (GLuint[]){vertex_shader, post_shader});
+    // create post->pass
+    pass_init(&post->pass, vertex_shader,
+              SHADER(GL_FRAGMENT_SHADER, post, frag));
 
     // create buffer and va for post quad
     glGenBuffers(1, &post->buffer);
@@ -120,6 +106,8 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
 void post_deinit(post_t *post) {
     if (post) {
         free(post->noise_buffer);
+        pass_fbo_deinit(&post->fbo);
+        pass_deinit(&post->pass);
     }
 }
 
@@ -145,22 +133,23 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     glClearColor(0, 0, 0, 1.);
     glClear(GL_COLOR_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, post->fbo_texture);
+    glBindTexture(GL_TEXTURE_2D, post->fbo.texture);
 
-    glUseProgram(post->program);
-    glUniform1i(glGetUniformLocation(post->program, VAR_u_InputSampler), 0);
-    glUniform1i(glGetUniformLocation(post->program, VAR_u_PerlinSampler), 1);
-    glUniform1i(glGetUniformLocation(post->program, VAR_u_RandSampler), 2);
-    glUniform1f(glGetUniformLocation(post->program, VAR_u_Brightness),
+    pass_bind_program(&post->pass);
+    glUniform1i(glGetUniformLocation(post->pass.program, VAR_u_InputSampler),
+                0);
+    glUniform1i(glGetUniformLocation(post->pass.program, VAR_u_PerlinSampler),
+                1);
+    glUniform1i(glGetUniformLocation(post->pass.program, VAR_u_RandSampler), 2);
+    glUniform1f(glGetUniformLocation(post->pass.program, VAR_u_Brightness),
                 get_value(tr->brightness));
-    glUniform1f(glGetUniformLocation(post->program, VAR_u_NoiseSize),
+    glUniform1f(glGetUniformLocation(post->pass.program, VAR_u_NoiseSize),
                 NOISE_SIZE);
-    glUniform2f(glGetUniformLocation(post->program, VAR_u_Resolution),
+    glUniform2f(glGetUniformLocation(post->pass.program, VAR_u_Resolution),
                 post->width, post->height);
-    glBindVertexArray(post->vao);
 
     // Draw screen quad
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    pass_draw(post->vao);
 }
 
 void post_resize(post_t *post, uint32_t width, uint32_t height) {
@@ -256,7 +245,7 @@ void scene_render(void *data, double time) {
     glViewport(0, 0, scene->width, scene->height);
 
     // draw test triangle
-    glBindFramebuffer(GL_FRAMEBUFFER, scene->post.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, scene->post.fbo.fbo);
     glClearColor(sin(time), 1., 0., 1.);
     glClear(GL_COLOR_BUFFER_BIT);
 
