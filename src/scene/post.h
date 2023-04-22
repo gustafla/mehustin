@@ -5,16 +5,6 @@
 #include "scene.h"
 #include "screen_pass.h"
 
-#ifndef MONOLITH
-#define VAR_u_InputSampler "u_InputSampler"
-#define VAR_u_BloomSampler "u_BloomSampler"
-#define VAR_u_PerlinSampler "u_PerlinSampler"
-#define VAR_u_RandSampler "u_RandSampler"
-#define VAR_u_Brightness "u_Brightness"
-#define VAR_u_NoiseSize "u_NoiseSize"
-#define VAR_u_Resolution "u_Resolution"
-#endif
-
 #define NOISE_SIZE 256
 #define N_FBOS 3
 
