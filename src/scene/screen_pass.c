@@ -21,14 +21,26 @@ int pass_fbo_init(pass_fbo_t *fbo, GLsizei width, GLsizei height) {
     return 0;
 }
 
+void pass_fbo_bind(const pass_fbo_t *fbo) {
+    if (fbo == NULL) {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+    }
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void pass_fbo_bind_tex(const pass_fbo_t *fbo, GLuint n) {
+    glActiveTexture(GL_TEXTURE0 + n);
+    glBindTexture(GL_TEXTURE_2D, fbo->texture);
+}
+
 void pass_fbo_deinit(const pass_fbo_t *fbo) {
     if (fbo) {
         glDeleteFramebuffers(1, &fbo->fbo);
         glDeleteTextures(1, &fbo->texture);
     }
 }
-
-void pass_bind_program(const pass_t *pass) { glUseProgram(pass->program); }
 
 int pass_init(pass_t *pass, GLuint vertex_shader, GLuint fragment_shader) {
     pass->program = link_program(2, (GLuint[]){vertex_shader, fragment_shader});
@@ -37,6 +49,12 @@ int pass_init(pass_t *pass, GLuint vertex_shader, GLuint fragment_shader) {
     }
     return 0;
 }
+
+GLint pass_ufmloc(const pass_t *pass, const char *name) {
+    return glGetUniformLocation(pass->program, name);
+}
+
+void pass_bind(const pass_t *pass) { glUseProgram(pass->program); }
 
 void pass_draw(GLuint vao) {
     glBindVertexArray(vao);

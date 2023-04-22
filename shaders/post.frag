@@ -6,6 +6,7 @@ varying vec3 v_Pos;
 varying vec2 v_TexCoord;
 
 uniform sampler2D u_InputSampler;
+uniform sampler2D u_BloomSampler;
 uniform sampler2D u_PerlinSampler;
 uniform sampler2D u_RandSampler;
 uniform float u_Brightness;
@@ -64,5 +65,6 @@ void main() {
     color *= rgb_pattern(distor, freq) * 0.2 + 0.8;
     color *= mod(gl_FragCoord.y, 2.) * 0.1 + 0.9;
 
-    FragColor = vec4(color + vec3(u_Brightness), 1.);
+    vec3 bloom = texture2D(u_BloomSampler, distor).rgb;
+    FragColor = vec4(color + vec3(u_Brightness) + bloom, 1.);
 }
