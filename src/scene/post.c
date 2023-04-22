@@ -1,6 +1,7 @@
 #define STB_PERLIN_IMPLEMENTATION
 #include "post.h"
 #include "rand.h"
+#include "resources.h"
 #include "stb_perlin.h"
 #include <stdlib.h>
 

@@ -2,7 +2,6 @@
 #define POST_H
 
 #include "api.h"
-#include "resources.h"
 #include "scene.h"
 #include "screen_pass.h"
 
