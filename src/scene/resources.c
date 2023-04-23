@@ -34,18 +34,12 @@ error:
 
 static const char *SHADER_VERSION = "#version 330 core\n";
 
-static void shader_source(GLuint shader, const char *shader_src,
-                          const char *defines) {
+static void shader_source(GLuint shader, const char *src, const char *defines) {
+    const char *srcs[] = {SHADER_VERSION, src, src};
     if (defines) {
-        glShaderSource(
-            shader, 3,
-            (const GLchar *const[]){SHADER_VERSION, defines, shader_src}, NULL);
-
-    } else {
-        glShaderSource(shader, 2,
-                       (const GLchar *const[]){SHADER_VERSION, shader_src},
-                       NULL);
+        srcs[1] = defines;
     }
+    glShaderSource(shader, 2 + (defines ? 1 : 0), srcs, NULL);
 }
 
 static GLenum type_to_enum(const char *shader_type) {
