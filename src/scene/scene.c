@@ -47,10 +47,10 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
     tracks_init(&scene->tr, gettrack);
 
     // load vertex shader
-    GLuint vertex_shader = SHADER(GL_VERTEX_SHADER, shader, vert);
+    GLuint vertex_shader = SHADER(GL_VERTEX_SHADER, shader, vert, NULL);
 
     // load basic fragment shader
-    GLuint fragment_shader = SHADER(GL_FRAGMENT_SHADER, shader, frag);
+    GLuint fragment_shader = SHADER(GL_FRAGMENT_SHADER, shader, frag, NULL);
 
     // create basic program
     scene->program =

@@ -31,11 +31,28 @@ error:
     return 0;
 }
 
-GLuint compile_shader(GLenum shader_type, const char *shader_src) {
+static const char *SHADER_VERSION = "#version 330 core\n";
+
+static void shader_source(GLuint shader, const char *shader_src,
+                          const char *defines) {
+    if (defines) {
+        glShaderSource(
+            shader, 3,
+            (const GLchar *const[]){SHADER_VERSION, defines, shader_src}, NULL);
+
+    } else {
+        glShaderSource(shader, 2,
+                       (const GLchar *const[]){SHADER_VERSION, shader_src},
+                       NULL);
+    }
+}
+
+GLuint compile_shader(GLenum shader_type, const char *shader_src,
+                      const char *defines) {
     GLuint shader;
 
     shader = glCreateShader(shader_type);
-    glShaderSource(shader, 1, (const GLchar *const *)&shader_src, NULL);
+    shader_source(shader, shader_src, defines);
     glCompileShader(shader);
 
     GLint status;
@@ -53,14 +70,15 @@ GLuint compile_shader(GLenum shader_type, const char *shader_src) {
     return shader;
 }
 
-GLuint compile_shader_file(GLenum shader_type, const char *path) {
+GLuint compile_shader_file(GLenum shader_type, const char *path,
+                           const char *defines) {
     char *shader_src = NULL;
 
     if (read_file_to_str(path, &shader_src) == 0) {
         return 0;
     }
 
-    GLuint shader = compile_shader(shader_type, shader_src);
+    GLuint shader = compile_shader(shader_type, shader_src, defines);
     free(shader_src);
 
     if (shader == 0) {
