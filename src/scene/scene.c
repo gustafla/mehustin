@@ -89,7 +89,7 @@ void scene_render(void *data, double time) {
     glViewport(0, 0, scene->width, scene->height);
 
     // draw test triangle
-    glClearColor(sin(time), 1., 0., 1.);
+    glClearColor(sin(time) * 0.5 + 0.5, 1., 0., 1.);
     post_bind_fbo(&scene->post);
 
     glUseProgram(scene->program);
