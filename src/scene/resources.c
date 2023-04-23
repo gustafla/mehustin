@@ -1,6 +1,7 @@
 #include "gl.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 size_t read_file_to_str(const char *file_path, char **dst) {
     FILE *file = fopen(file_path, "r");
@@ -47,11 +48,23 @@ static void shader_source(GLuint shader, const char *shader_src,
     }
 }
 
-GLuint compile_shader(GLenum shader_type, const char *shader_src,
+static GLenum type_to_enum(const char *shader_type) {
+    if (strcmp("vert", shader_type) == 0) {
+        return GL_VERTEX_SHADER;
+    } else if (strcmp("geom", shader_type) == 0) {
+        return GL_GEOMETRY_SHADER;
+    } else if (strcmp("frag", shader_type) == 0) {
+        return GL_FRAGMENT_SHADER;
+    }
+    fprintf(stderr, "Unrecognized shader type: %s\n", shader_type);
+    return GL_INVALID_ENUM;
+}
+
+GLuint compile_shader(const char *shader_src, const char *shader_type,
                       const char *defines) {
     GLuint shader;
 
-    shader = glCreateShader(shader_type);
+    shader = glCreateShader(type_to_enum(shader_type));
     shader_source(shader, shader_src, defines);
     glCompileShader(shader);
 
@@ -70,19 +83,26 @@ GLuint compile_shader(GLenum shader_type, const char *shader_src,
     return shader;
 }
 
-GLuint compile_shader_file(GLenum shader_type, const char *path,
-                           const char *defines) {
+GLuint compile_shader_file(const char *filename, const char *defines) {
     char *shader_src = NULL;
 
-    if (read_file_to_str(path, &shader_src) == 0) {
+    if (read_file_to_str(filename, &shader_src) == 0) {
         return 0;
     }
 
-    GLuint shader = compile_shader(shader_type, shader_src, defines);
+    // Find file extension
+    const char *shader_type = filename, *ret;
+    do {
+        if ((ret = strchr(shader_type, '.'))) {
+            shader_type = ret + 1;
+        }
+    } while (ret);
+
+    GLuint shader = compile_shader(shader_src, shader_type, defines);
     free(shader_src);
 
     if (shader == 0) {
-        fprintf(stderr, "File: %s\n", path);
+        fprintf(stderr, "File: %s\n", filename);
     }
 
     return shader;

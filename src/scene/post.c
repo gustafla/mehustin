@@ -34,11 +34,9 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
 
     // create shader passes
     pass_init(&post->bloomx, vertex_shader,
-              SHADER(GL_FRAGMENT_SHADER, bloom, frag, "#define FIRST_PASS\n"));
-    pass_init(&post->bloomy, vertex_shader,
-              SHADER(GL_FRAGMENT_SHADER, bloom, frag, NULL));
-    pass_init(&post->pass, vertex_shader,
-              SHADER(GL_FRAGMENT_SHADER, post, frag, NULL));
+              SHADER(bloom, frag, "#define FIRST_PASS\n"));
+    pass_init(&post->bloomy, vertex_shader, SHADER(bloom, frag, NULL));
+    pass_init(&post->pass, vertex_shader, SHADER(post, frag, NULL));
 
     // create buffer and va for post quad
     glGenBuffers(1, &post->buffer);
