@@ -8,7 +8,7 @@ uniform sampler2D u_BloomSampler;
 uniform sampler2D u_PerlinSampler;
 uniform sampler2D u_RandSampler;
 uniform float u_Brightness;
-uniform float u_NoiseSize;
+uniform int u_NoiseSize;
 uniform vec2 u_Resolution;
 
 #define PI 3.14159265
@@ -33,16 +33,7 @@ vec3 rgb_pattern(vec2 uv, vec2 freq) {
     return clamp(pattern, 0., 1.);
 }
 
-void main() {
-    // coordinates
-    vec2 center = v_TexCoord - vec2(0.5);
-    vec2 distor = center * vec2(
-            1. + abs(center.y * center.y) * 0.1,
-            1. + abs(center.x * center.x) * 0.2) + vec2(0.5);
-
-    // Input color
-    vec3 color = texture2D(u_InputSampler, distor).rgb;
-
+vec3 crt(vec3 color, vec2 uv, vec2 center) {
     // Add perlin and random rgb noises
     vec2 noise_scale = u_Resolution / u_NoiseSize;
     vec2 noise_coord = v_TexCoord * noise_scale;
@@ -52,17 +43,58 @@ void main() {
     noise -= 0.04;
     color += noise;
 
-    // Vignette
-    color -= length(center * 0.12);
-
     // Add texture to screen edges
-    color *= edge_pattern(distor, 300., 3.5);
+    color *= edge_pattern(uv, 300., 3.5);
 
     // Add rgb pattern and scanlines
     vec2 freq = vec2(u_Resolution.x / 3.2, u_Resolution.y / 2.4);
-    color *= rgb_pattern(distor, freq) * 0.2 + 0.8;
+    color *= rgb_pattern(uv, freq) * 0.2 + 0.8;
     color *= mod(gl_FragCoord.y, 2.) * 0.1 + 0.9;
 
-    vec3 bloom = texture2D(u_BloomSampler, distor).rgb;
-    FragColor = vec4(color + vec3(u_Brightness) + bloom, 1.);
+    // Vignette
+    color -= length(center * 0.12);
+
+    return color;
+}
+
+vec3 aces_approx(vec3 v) {
+    v *= 0.6;
+    float a = 2.51;
+    float b = 0.03;
+    float c = 2.43;
+    float d = 0.59;
+    float e = 0.14;
+    return clamp((v*(a*v+b))/(v*(c*v+d)+e), 0., 1.);
+}
+
+void main() {
+    // coordinates for crt effect
+    //vec2 center = v_TexCoord - vec2(0.5);
+    //vec2 distor = center * vec2(
+    //        1. + abs(center.y * center.y) * 0.1,
+    //        1. + abs(center.x * center.x) * 0.2) + vec2(0.5);
+
+    //// Hide edges
+    //if (distor.x < 0 || distor.x > 1. || distor.y < 0. || distor.y > 1.) {
+    //    discard;
+    //}
+
+    vec2 uv = v_TexCoord;
+
+    // Input color
+    vec3 color = texture2D(u_InputSampler, uv).rgb;
+
+    // Add bloom
+    color += texture2D(u_BloomSampler, uv).rgb;
+
+    // Tone mapping
+    color = aces_approx(color);
+
+    // Add brightness fade
+    color += vec3(u_Brightness);
+
+    // Add noise
+    color += texelFetch(u_RandSampler, ivec2(gl_FragCoord.xy) % u_NoiseSize, 0).rgb * 0.08 - 0.04;
+
+    FragColor = vec4(color, 1.);
 }

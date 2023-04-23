@@ -157,7 +157,7 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     glUniform1i(pass_ufmloc(&post->pass, VAR_u_RandSampler), 3);
     glUniform1f(pass_ufmloc(&post->pass, VAR_u_Brightness),
                 get_value(tr->brightness));
-    glUniform1f(pass_ufmloc(&post->pass, VAR_u_NoiseSize), NOISE_SIZE);
+    glUniform1i(pass_ufmloc(&post->pass, VAR_u_NoiseSize), NOISE_SIZE);
     viewport_set_u_resolution(&post->output_viewport,
                               pass_ufmloc(&post->pass, VAR_u_Resolution));
 
