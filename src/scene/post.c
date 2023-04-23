@@ -33,9 +33,10 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
     }
 
     // create shader passes
-    pass_init(&post->bloomx, vertex_shader,
-              SHADER(bloom, frag, "#define FIRST_PASS\n"));
-    pass_init(&post->bloomy, vertex_shader, SHADER(bloom, frag, NULL));
+    pass_init(&post->bloom_pre, vertex_shader, SHADER(bloom_pre, frag, NULL));
+    pass_init(&post->blurx, vertex_shader,
+              SHADER(blur, frag, "#define HORIZONTAL\n"));
+    pass_init(&post->blury, vertex_shader, SHADER(blur, frag, NULL));
     pass_init(&post->pass, vertex_shader, SHADER(post, frag, NULL));
 
     // create buffer and va for post quad
@@ -84,8 +85,9 @@ void post_deinit(post_t *post) {
         for (int i = 0; i < N_FBOS; i++) {
             pass_fbo_deinit(&post->fbos[i]);
         }
-        pass_deinit(&post->bloomx);
-        pass_deinit(&post->bloomy);
+        pass_deinit(&post->bloom_pre);
+        pass_deinit(&post->blurx);
+        pass_deinit(&post->blury);
         pass_deinit(&post->pass);
     }
 }
@@ -93,26 +95,37 @@ void post_deinit(post_t *post) {
 void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     glClearColor(0, 0, 0, 1.);
 
-    // Start pass to bloom x buffer -------------------------------------------
+    // Start pass to bloom_pre buffer -----------------------------------------
 
     pass_fbo_bind(&post->fbos[1]);
     viewport_bind(&post->source_viewport);
-    pass_bind(&post->bloomx);
+    pass_bind(&post->bloom_pre);
     pass_fbo_bind_tex(&post->fbos[0], 0); // Main image
-    glUniform1i(pass_ufmloc(&post->bloomx, VAR_u_InputSampler), 0);
+    glUniform1i(pass_ufmloc(&post->bloom_pre, VAR_u_InputSampler), 0);
     viewport_set_u_resolution(&post->source_viewport,
-                              pass_ufmloc(&post->bloomx, VAR_u_Resolution));
+                              pass_ufmloc(&post->bloom_pre, VAR_u_Resolution));
     pass_draw(post->vao);
 
-    // Start pass to bloom y buffer -------------------------------------------
+    // Start pass to blur_x buffer --------------------------------------------
 
     pass_fbo_bind(&post->fbos[2]);
     viewport_bind(&post->source_viewport);
-    pass_bind(&post->bloomy);
-    pass_fbo_bind_tex(&post->fbos[1], 0); // Bloom X image
-    glUniform1i(pass_ufmloc(&post->bloomy, VAR_u_InputSampler), 0);
+    pass_bind(&post->blurx);
+    pass_fbo_bind_tex(&post->fbos[1], 0); // Bloom pre image
+    glUniform1i(pass_ufmloc(&post->blurx, VAR_u_InputSampler), 0);
     viewport_set_u_resolution(&post->source_viewport,
-                              pass_ufmloc(&post->bloomy, VAR_u_Resolution));
+                              pass_ufmloc(&post->blurx, VAR_u_Resolution));
+    pass_draw(post->vao);
+
+    // Start pass to blur_y buffer --------------------------------------------
+
+    pass_fbo_bind(&post->fbos[1]);
+    viewport_bind(&post->source_viewport);
+    pass_bind(&post->blury);
+    pass_fbo_bind_tex(&post->fbos[2], 0); // Bloom X image
+    glUniform1i(pass_ufmloc(&post->blury, VAR_u_InputSampler), 0);
+    viewport_set_u_resolution(&post->source_viewport,
+                              pass_ufmloc(&post->blury, VAR_u_Resolution));
     pass_draw(post->vao);
 
     // Start pass to output back buffer ---------------------------------------
@@ -122,7 +135,7 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
 
     // Bind earlier pass' outputs as inputs
     pass_fbo_bind_tex(&post->fbos[0], 0); // Main image
-    pass_fbo_bind_tex(&post->fbos[2], 1); // Bloom
+    pass_fbo_bind_tex(&post->fbos[1], 1); // Bloom
 
     // Bind perlin noise
     glActiveTexture(GL_TEXTURE2);

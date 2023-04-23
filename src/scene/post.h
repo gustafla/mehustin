@@ -20,8 +20,9 @@ typedef struct post_t_ {
     viewport_t source_viewport;
     float source_aspect_ratio;
     pass_fbo_t fbos[N_FBOS]; // 0: main image, 1: bloom x, 2: bloom y
-    pass_t bloomx;
-    pass_t bloomy;
+    pass_t bloom_pre;
+    pass_t blurx;
+    pass_t blury;
     pass_t pass;
     GLuint buffer;
     GLuint vao;
