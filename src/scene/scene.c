@@ -35,8 +35,6 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
         fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
     }
 #endif
-    // glEnable(GL_FRAMEBUFFER_SRGB); // Should this be enabled on Windows or
-    // Xorg?
 
     scene_t *scene = malloc(sizeof(scene_t));
     scene->get_value = getval;

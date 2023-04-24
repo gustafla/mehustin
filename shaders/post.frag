@@ -97,5 +97,4 @@ void main() {
     color += texelFetch(u_RandSampler, ivec2(gl_FragCoord.xy) % u_NoiseSize, 0).rgb * 0.08 - 0.04;
 
     FragColor = vec4(color, 1.);
-    //FragColor = vec4(uv.xxx, 1.); // sRGB test gradient
 }
