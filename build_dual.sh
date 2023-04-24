@@ -22,3 +22,4 @@ make libs
 # Build Linux
 make DEBUG=0
 make DEBUG=0 install
+cp -L /usr/lib/libSDL2-2.0.so.0 demo/bin
