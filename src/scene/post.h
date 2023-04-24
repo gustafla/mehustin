@@ -30,8 +30,7 @@ typedef struct post_t_ {
     void *noise_buffer;
 } post_t;
 
-void post_init(post_t *post, GLsizei width, GLsizei height,
-               GLuint vertex_shader);
+void post_init(post_t *post, GLsizei width, GLsizei height);
 void post_deinit(post_t *post);
 void post_draw(post_t *post, const tracks_t *tr, getval_t get_value);
 void post_resize(post_t *post, uint32_t width, uint32_t height);

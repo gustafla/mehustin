@@ -17,8 +17,7 @@ void viewport_set_u_resolution(const viewport_t *v, GLuint location) {
     glUniform2f(location, v->width, v->height);
 }
 
-void post_init(post_t *post, GLsizei width, GLsizei height,
-               GLuint vertex_shader) {
+void post_init(post_t *post, GLsizei width, GLsizei height) {
     post->source_aspect_ratio = (float)width / (float)height;
     post->source_viewport.x = 0;
     post->source_viewport.y = 0;
@@ -31,6 +30,9 @@ void post_init(post_t *post, GLsizei width, GLsizei height,
     for (int i = 0; i < N_FBOS; i++) {
         pass_fbo_init(&post->fbos[i], width, height);
     }
+
+    // load vertex shader
+    GLuint vertex_shader = SHADER(shader, vert, NULL);
 
     // create shader passes
     pass_init(&post->bloom_pre, vertex_shader, SHADER(bloom_pre, frag, NULL));
@@ -94,6 +96,8 @@ void post_deinit(post_t *post) {
 
 void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     glClearColor(0, 0, 0, 1.);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
 
     // Start pass to bloom_pre buffer -----------------------------------------
 
