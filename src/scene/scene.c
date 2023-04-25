@@ -3,6 +3,7 @@
 #include "cglm/cam.h"
 #include "gl.h"
 #include "post.h"
+#include "primitives.h"
 #include "rand.h"
 #include "resources.h"
 #include <math.h>
@@ -14,18 +15,40 @@
 
 void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
     tracks->brightness = gettrack("post:brightness");
+    tracks->cam_pos_x = gettrack("cam:pos.x");
+    tracks->cam_pos_y = gettrack("cam:pos.y");
+    tracks->cam_pos_z = gettrack("cam:pos.z");
+    tracks->cam_dir_x = gettrack("cam:dir.x");
+    tracks->cam_dir_y = gettrack("cam:dir.y");
+    tracks->cam_dir_z = gettrack("cam:dir.z");
 }
+
+#define GET_CAM_POS                                                            \
+    (vec3) {                                                                   \
+        scene->get_value(scene->tr.cam_pos_x),                                 \
+            scene->get_value(scene->tr.cam_pos_y),                             \
+            scene->get_value(scene->tr.cam_pos_z),                             \
+    }
+
+#define GET_CAM_DIR                                                            \
+    (vec3) {                                                                   \
+        scene->get_value(scene->tr.cam_dir_x),                                 \
+            scene->get_value(scene->tr.cam_dir_y),                             \
+            scene->get_value(scene->tr.cam_dir_z),                             \
+    }
 
 typedef struct scene_t_ {
     getval_t get_value;
     gettrack_t get_track;
     tracks_t tr;
+    primitives_t primitives;
     post_t post;
     int32_t width;
     int32_t height;
     GLuint program;
-    GLuint buffers[1];
+    GLuint point_instance_buffer;
     GLuint vao;
+    mat4 view;
     mat4 projection;
 } scene_t;
 
@@ -57,6 +80,9 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
     scene->height = height;
     tracks_init(&scene->tr, gettrack);
 
+    // load rendering primitives
+    primitives_init(&scene->primitives);
+
     // load vertex shader
     GLuint vertex_shader = SHADER(point, vert, NULL);
 
@@ -67,30 +93,42 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
     scene->program =
         link_program(2, (GLuint[]){vertex_shader, fragment_shader});
 
-    vec3 point_vertices[POINTS * 3 * 2] = {0};
+    // create instances for points
+    vec3 point_instances[POINTS] = {0};
     for (int i = 0; i < POINTS; i++) {
-        vec3 vertex;
-        random_vec3(vertex);
-        for (int j = 0; j < 6; j++) {
-            memcpy(point_vertices[i * 6 + j], vertex, sizeof(vertex));
-        }
+        random_vec3(point_instances[i]);
     }
+    glGenBuffers(1, &scene->point_instance_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, scene->point_instance_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(point_instances),
+                 (const GLvoid *)point_instances, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // create buffer and va for points
-    glGenBuffers(1, scene->buffers);
+    // set up vertex attributes -----------------------------------------------
     glGenVertexArrays(1, &scene->vao);
     glBindVertexArray(scene->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, scene->buffers[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(point_vertices),
-                 (const GLvoid *)point_vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    // 1. quad positions and texture coordinates
+    glBindBuffer(GL_ARRAY_BUFFER, scene->primitives.quad_vertices);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, NULL);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5,
+                          (const void *)(sizeof(GLfloat) * 3));
+
+    // 2. quad instance world positions
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, scene->point_instance_buffer);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(2, 1);
+    // ------------------------------------------------------------------------
 
     // projection matrix
     float aspect = (float)width / (float)height;
     glm_perspective(90., aspect, 0.1, 100., scene->projection);
 
-    post_init(&scene->post, width, height);
+    post_init(&scene->post, &scene->primitives, width, height);
 
     return scene;
 }
@@ -104,6 +142,7 @@ void scene_deinit(void *data) {
     if (data) {
         scene_t *scene = data;
         post_deinit(&scene->post);
+        primitives_deinit(&scene->primitives);
         free(scene);
     }
 }
@@ -120,10 +159,14 @@ void scene_render(void *data, double time) {
     post_bind_fbo(&scene->post);
 
     glUseProgram(scene->program);
+    glm_look_anyup(GET_CAM_POS, GET_CAM_DIR, scene->view);
+    glUniformMatrix4fv(glGetUniformLocation(scene->program, VAR_u_View), 1,
+                       GL_FALSE, (float *)scene->view);
     glUniformMatrix4fv(glGetUniformLocation(scene->program, VAR_u_Projection),
                        1, GL_FALSE, (float *)scene->projection);
     glBindVertexArray(scene->vao);
-    glDrawArrays(GL_TRIANGLES, 0, POINTS * 6);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, POINTS);
+    glBindVertexArray(0);
 
     // draw post pass
     post_draw(&scene->post, &scene->tr, scene->get_value);

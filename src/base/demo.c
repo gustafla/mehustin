@@ -14,6 +14,8 @@ static struct demo_ {
     struct sync_device *rocket;
     int width;
     int height;
+    int resize_width;
+    int resize_height;
     void *scene_data;
 } demo;
 
@@ -52,8 +54,8 @@ int demo_init(player_t *player, int width, int height, double bpm, double rpb) {
 #endif // defined(SYNC_PLAYER)
 
     // store resolution
-    demo.width = width;
-    demo.height = height;
+    demo.resize_width = demo.width = width;
+    demo.resize_height = demo.height = height;
 
     // set row rate
     demo.row_rate = (bpm / 60.) * rpb;
@@ -121,10 +123,14 @@ int demo_reload(void) {
         return EXIT_FAILURE;
     }
 
+    SCENE_RESIZE(demo.scene_data, demo.resize_width, demo.resize_height);
+
     return EXIT_SUCCESS;
 }
 
 void demo_resize(int width, int height) {
+    demo.resize_width = width;
+    demo.resize_height = height;
     SCENE_RESIZE(demo.scene_data, width, height);
 }
 

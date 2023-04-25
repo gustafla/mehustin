@@ -5,10 +5,6 @@
 #include "stb_perlin.h"
 #include <stdlib.h>
 
-static const GLfloat quad[] = {-1.f, -1., 0., 0., 0., 1.,  -1., 0., 1., 0.,
-                               1.,   1.,  0., 1., 1., -1., -1., 0., 0., 0.,
-                               1.,   1.,  0., 1., 1., -1., 1.,  0., 0., 1.};
-
 void viewport_bind(const viewport_t *v) {
     glViewport(v->x, v->y, v->width, v->height);
 }
@@ -17,7 +13,8 @@ void viewport_set_u_resolution(const viewport_t *v, GLuint location) {
     glUniform2f(location, v->width, v->height);
 }
 
-void post_init(post_t *post, GLsizei width, GLsizei height) {
+void post_init(post_t *post, primitives_t *primitives, GLsizei width,
+               GLsizei height) {
     post->source_aspect_ratio = (float)width / (float)height;
     post->source_viewport.x = 0;
     post->source_viewport.y = 0;
@@ -41,13 +38,10 @@ void post_init(post_t *post, GLsizei width, GLsizei height) {
     pass_init(&post->blury, vertex_shader, SHADER(blur, frag, NULL));
     pass_init(&post->pass, vertex_shader, SHADER(post, frag, NULL));
 
-    // create buffer and va for post quad
-    glGenBuffers(1, &post->buffer);
+    // create va for post quad
     glGenVertexArrays(1, &post->vao);
     glBindVertexArray(post->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, post->buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 30, (const GLvoid *)quad,
-                 GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, primitives->quad_vertices);
     size_t stride = sizeof(GLfloat) * 5;
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
     glEnableVertexAttribArray(0);

@@ -2,6 +2,7 @@
 #define POST_H
 
 #include "api.h"
+#include "primitives.h"
 #include "scene.h"
 #include "screen_pass.h"
 
@@ -24,13 +25,13 @@ typedef struct post_t_ {
     pass_t blurx;
     pass_t blury;
     pass_t pass;
-    GLuint buffer;
     GLuint vao;
     GLuint noise[2];
     void *noise_buffer;
 } post_t;
 
-void post_init(post_t *post, GLsizei width, GLsizei height);
+void post_init(post_t *post, primitives_t *primitives, GLsizei width,
+               GLsizei height);
 void post_deinit(post_t *post);
 void post_draw(post_t *post, const tracks_t *tr, getval_t get_value);
 void post_resize(post_t *post, uint32_t width, uint32_t height);

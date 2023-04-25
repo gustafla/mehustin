@@ -59,6 +59,7 @@ void pass_bind(const pass_t *pass) { glUseProgram(pass->program); }
 void pass_draw(GLuint vao) {
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 }
 
 void pass_deinit(const pass_t *pass) { glDeleteProgram(pass->program); }
