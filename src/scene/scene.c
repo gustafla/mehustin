@@ -21,6 +21,7 @@ void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
     tracks->cam_dir_x = gettrack("cam:dir.x");
     tracks->cam_dir_y = gettrack("cam:dir.y");
     tracks->cam_dir_z = gettrack("cam:dir.z");
+    tracks->cam_focus = gettrack("cam:focus");
 }
 
 #define GET_CAM_POS                                                            \
@@ -151,12 +152,13 @@ void scene_render(void *data, double time) {
     scene_t *scene = data;
     glViewport(0, 0, scene->width, scene->height);
     glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glEnable(GL_PROGRAM_POINT_SIZE);
 
     // draw point cube
     glClearColor(0., 0, 0., 1.);
-    post_bind_fbo(&scene->post);
+    pass_fbo_bind(post_get_fbo(&scene->post));
+    glEnablei(GL_BLEND, post_get_fbo(&scene->post)->fbo);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glBlendEquation(GL_FUNC_ADD);
 
     glUseProgram(scene->program);
     glm_look_anyup(GET_CAM_POS, GET_CAM_DIR, scene->view);
@@ -164,6 +166,8 @@ void scene_render(void *data, double time) {
                        GL_FALSE, (float *)scene->view);
     glUniformMatrix4fv(glGetUniformLocation(scene->program, VAR_u_Projection),
                        1, GL_FALSE, (float *)scene->projection);
+    glUniform1f(glGetUniformLocation(scene->program, VAR_u_Focus),
+                scene->get_value(scene->tr.cam_focus));
     glBindVertexArray(scene->vao);
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, POINTS);
     glBindVertexArray(0);

@@ -179,4 +179,4 @@ void post_resize(post_t *post, uint32_t width, uint32_t height) {
     }
 }
 
-void post_bind_fbo(const post_t *post) { pass_fbo_bind(&post->fbos[0]); }
+const pass_fbo_t *post_get_fbo(const post_t *post) { return &post->fbos[0]; }

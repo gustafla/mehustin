@@ -35,6 +35,6 @@ void post_init(post_t *post, primitives_t *primitives, GLsizei width,
 void post_deinit(post_t *post);
 void post_draw(post_t *post, const tracks_t *tr, getval_t get_value);
 void post_resize(post_t *post, uint32_t width, uint32_t height);
-void post_bind_fbo(const post_t *post);
+const pass_fbo_t *post_get_fbo(const post_t *post);
 
 #endif
