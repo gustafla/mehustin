@@ -22,7 +22,7 @@ void particles_init(particles_t *particles, primitives_t *const primitives) {
     GLuint vertex_shader = SHADER(point, vert, NULL);
 
     // load fragment shader
-    GLuint fragment_shader = SHADER(shader, frag, NULL);
+    GLuint fragment_shader = SHADER(point, frag, NULL);
 
     // create basic program
     particles->program =
