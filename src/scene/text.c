@@ -7,25 +7,29 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
+#define ATLAS_SIZE 2048
+#define FONT_HEIGHT 360
+
 void text_init(text_t *text, char *msg) {
-    static unsigned char temp_bitmap[512 * 512];
+    static unsigned char temp_bitmap[ATLAS_SIZE * ATLAS_SIZE];
 
     char *ttf = NULL;
     size_t ttf_size = read_file_to_str("LiberationSerif-Regular.ttf", &ttf);
     assert(ttf_size != 0);
 
-    stbtt_BakeFontBitmap((const unsigned char *)ttf, 0, 32.0, temp_bitmap, 512,
-                         512, 32, 96,
+    stbtt_BakeFontBitmap((const unsigned char *)ttf, 0, FONT_HEIGHT,
+                         temp_bitmap, ATLAS_SIZE, ATLAS_SIZE, 32, 96,
                          text->cdata); // no guarantee this fits!
     free(ttf);
 
     glGenTextures(1, &text->ftex);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, text->ftex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE,
-                 temp_bitmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, ATLAS_SIZE, ATLAS_SIZE, 0, GL_RED,
+                 GL_UNSIGNED_BYTE, temp_bitmap);
 
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     size_t quad_floats = 4 * 6;
     size_t quad_size = quad_floats * sizeof(float);
@@ -37,7 +41,8 @@ void text_init(text_t *text, char *msg) {
         char c = msg[i];
         if (c >= 32 && c < 128) {
             stbtt_aligned_quad q;
-            stbtt_GetBakedQuad(text->cdata, 512, 512, c - 32, &x, &y, &q,
+            stbtt_GetBakedQuad(text->cdata, ATLAS_SIZE, ATLAS_SIZE, c - 32, &x,
+                               &y, &q,
                                1); // 1=opengl & d3d10+,0=d3d9
             printf("tex %f, %f\n", q.s0, q.t0);
             printf("pos %f, %f\n", q.x0, q.y0);
@@ -109,8 +114,8 @@ void text_init(text_t *text, char *msg) {
 
 void text_draw(text_t *text, mat4 view, mat4 projection) {
     mat4 model;
-    float scale = 1. / 32;
-    glm_scale_make(model, (vec3){scale, scale, scale});
+    float scale = 1. / FONT_HEIGHT;
+    glm_scale_make(model, (vec3){scale, -scale, scale});
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, text->ftex);
