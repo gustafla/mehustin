@@ -33,11 +33,11 @@ void text_init(text_t *text, char *msg) {
     float *quads = malloc(msg_len * quad_size);
 
     float x = 0, y = 0;
-    size_t i = 0;
-    while (*msg) {
-        if (*msg >= 32 && *msg < 128) {
+    for (size_t i = 0; i < msg_len; i++) {
+        char c = msg[i];
+        if (c >= 32 && c < 128) {
             stbtt_aligned_quad q;
-            stbtt_GetBakedQuad(text->cdata, 512, 512, *msg - 32, &x, &y, &q,
+            stbtt_GetBakedQuad(text->cdata, 512, 512, c - 32, &x, &y, &q,
                                1); // 1=opengl & d3d10+,0=d3d9
             printf("tex %f, %f\n", q.s0, q.t0);
             printf("pos %f, %f\n", q.x0, q.y0);
@@ -75,8 +75,6 @@ void text_init(text_t *text, char *msg) {
             quads[i * quad_floats + 22] = q.s1;
             quads[i * quad_floats + 23] = q.t0;
         }
-        ++msg;
-        ++i;
     }
 
     glGenBuffers(1, &text->buffer);
