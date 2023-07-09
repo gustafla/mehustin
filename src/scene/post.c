@@ -88,7 +88,7 @@ void post_deinit(post_t *post) {
     }
 }
 
-void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
+void post_draw(post_t *post, gettrack_t get_track, getval_t get_value) {
     glClearColor(0, 0, 0, 1.);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -154,7 +154,7 @@ void post_draw(post_t *post, const tracks_t *tr, getval_t get_value) {
     glUniform1i(pass_ufmloc(&post->pass, VAR_u_PerlinSampler), 2);
     glUniform1i(pass_ufmloc(&post->pass, VAR_u_RandSampler), 3);
     glUniform1f(pass_ufmloc(&post->pass, VAR_u_Brightness),
-                get_value(tr->brightness));
+                get_value(get_track("post:brightness")));
     glUniform1i(pass_ufmloc(&post->pass, VAR_u_NoiseSize), NOISE_SIZE);
     viewport_set_u_resolution(&post->output_viewport,
                               pass_ufmloc(&post->pass, VAR_u_Resolution));

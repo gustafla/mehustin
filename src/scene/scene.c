@@ -4,67 +4,39 @@
 #include "gl.h"
 #include "post.h"
 #include "primitives.h"
-#include "rand.h"
 #include "resources.h"
+#include "scene/particles.h"
 #include <GL/gl.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define POINTS 204096
-
-void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
-    tracks->brightness = gettrack("post:brightness");
-    tracks->cam_pos_x = gettrack("cam:pos.x");
-    tracks->cam_pos_y = gettrack("cam:pos.y");
-    tracks->cam_pos_z = gettrack("cam:pos.z");
-    tracks->cam_dir_x = gettrack("cam:dir.x");
-    tracks->cam_dir_y = gettrack("cam:dir.y");
-    tracks->cam_dir_z = gettrack("cam:dir.z");
-    tracks->cam_focus = gettrack("cam:focus");
-}
-
 #define GET_CAM_POS                                                            \
     (vec3) {                                                                   \
-        scene->get_value(scene->tr.cam_pos_x),                                 \
-            scene->get_value(scene->tr.cam_pos_y),                             \
-            scene->get_value(scene->tr.cam_pos_z),                             \
+        scene->get_value(scene->get_track("cam:pos.x")),                       \
+            scene->get_value(scene->get_track("cam:pos.y")),                   \
+            scene->get_value(scene->get_track("cam:pos.z")),                   \
     }
 
 #define GET_CAM_DIR                                                            \
     (vec3) {                                                                   \
-        scene->get_value(scene->tr.cam_dir_x),                                 \
-            scene->get_value(scene->tr.cam_dir_y),                             \
-            scene->get_value(scene->tr.cam_dir_z),                             \
+        scene->get_value(scene->get_track("cam:dir.x")),                       \
+            scene->get_value(scene->get_track("cam:dir.y")),                   \
+            scene->get_value(scene->get_track("cam:dir.z")),                   \
     }
 
 typedef struct scene_t_ {
     getval_t get_value;
     gettrack_t get_track;
-    tracks_t tr;
     primitives_t primitives;
     post_t post;
     int32_t width;
     int32_t height;
-    GLuint program;
-    GLuint point_instance_buffer;
-    GLuint vao;
     mat4 view;
     mat4 projection;
+    particles_t particles;
 } scene_t;
-
-float random_float(void) {
-    uint16_t random = rand_xoshiro();
-    return ((float)random / (float)UINT16_MAX) * 2. - 1.;
-}
-
-void random_vec4(vec4 vec) {
-    vec[0] = random_float();
-    vec[1] = random_float();
-    vec[2] = random_float();
-    vec[3] = random_float();
-}
 
 void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
                  getval_t getval) {
@@ -81,52 +53,9 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
     scene->get_track = gettrack;
     scene->width = width;
     scene->height = height;
-    tracks_init(&scene->tr, gettrack);
 
     // load rendering primitives
     primitives_init(&scene->primitives);
-
-    // load vertex shader
-    GLuint vertex_shader = SHADER(point, vert, NULL);
-
-    // load fragment shader
-    GLuint fragment_shader = SHADER(shader, frag, NULL);
-
-    // create basic program
-    scene->program =
-        link_program(2, (GLuint[]){vertex_shader, fragment_shader});
-
-    // create instances for points
-    vec4 point_instances[POINTS] = {0};
-    for (int i = 0; i < POINTS; i++) {
-        random_vec4(point_instances[i]);
-        point_instances[i][3] += 0.3;
-        point_instances[i][3] *= point_instances[i][3];
-    }
-    glGenBuffers(1, &scene->point_instance_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, scene->point_instance_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(point_instances),
-                 (const GLvoid *)point_instances, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // set up vertex attributes -----------------------------------------------
-    glGenVertexArrays(1, &scene->vao);
-    glBindVertexArray(scene->vao);
-
-    // 1. quad positions and texture coordinates
-    glBindBuffer(GL_ARRAY_BUFFER, scene->primitives.quad_vertices);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, NULL);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5,
-                          (const void *)(sizeof(GLfloat) * 3));
-
-    // 2. quad instance world positions
-    glEnableVertexAttribArray(2);
-    glBindBuffer(GL_ARRAY_BUFFER, scene->point_instance_buffer);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, NULL);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glVertexAttribDivisor(2, 1);
     // ------------------------------------------------------------------------
 
     // projection matrix
@@ -134,6 +63,8 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
     glm_perspective(90., aspect, 0.1, 100., scene->projection);
 
     post_init(&scene->post, &scene->primitives, width, height);
+
+    particles_init(&scene->particles, &scene->primitives);
 
     return scene;
 }
@@ -155,29 +86,16 @@ void scene_deinit(void *data) {
 void scene_render(void *data, double time) {
     scene_t *scene = data;
     glViewport(0, 0, scene->width, scene->height);
-    glDisable(GL_DEPTH_TEST);
-
-    // draw point cube
+    glm_look_anyup(GET_CAM_POS, GET_CAM_DIR, scene->view);
     glClearColor(0., 0, 0., 1.);
     pass_fbo_bind(post_get_fbo(&scene->post));
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    glBlendEquation(GL_FUNC_ADD);
 
-    glUseProgram(scene->program);
-    glm_look_anyup(GET_CAM_POS, GET_CAM_DIR, scene->view);
-    glUniformMatrix4fv(glGetUniformLocation(scene->program, VAR_u_View), 1,
-                       GL_FALSE, (float *)scene->view);
-    glUniformMatrix4fv(glGetUniformLocation(scene->program, VAR_u_Projection),
-                       1, GL_FALSE, (float *)scene->projection);
-    glUniform1f(glGetUniformLocation(scene->program, VAR_u_Focus),
-                scene->get_value(scene->tr.cam_focus));
-    glBindVertexArray(scene->vao);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, POINTS);
-    glBindVertexArray(0);
+    // draw point cube
+    particles_draw(&scene->particles, scene->get_track, scene->get_value,
+                   scene->view, scene->projection);
 
     // draw post pass
-    post_draw(&scene->post, &scene->tr, scene->get_value);
+    post_draw(&scene->post, scene->get_track, scene->get_value);
 
     // use MESA_DEBUG=1 env to debug
 }

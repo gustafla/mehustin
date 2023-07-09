@@ -33,7 +33,7 @@ typedef struct post_t_ {
 void post_init(post_t *post, primitives_t *primitives, GLsizei width,
                GLsizei height);
 void post_deinit(post_t *post);
-void post_draw(post_t *post, const tracks_t *tr, getval_t get_value);
+void post_draw(post_t *post, gettrack_t get_track, getval_t get_value);
 void post_resize(post_t *post, uint32_t width, uint32_t height);
 const pass_fbo_t *post_get_fbo(const post_t *post);
 
