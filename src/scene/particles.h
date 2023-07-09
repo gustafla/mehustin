@@ -7,7 +7,7 @@
 #include "scene.h"
 #include <cglm/mat4.h>
 
-#define POINTS 204096
+#define POINTS 4096
 
 typedef struct particles_t_ {
     GLuint point_instance_buffer;

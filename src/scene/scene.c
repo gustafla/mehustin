@@ -6,6 +6,7 @@
 #include "primitives.h"
 #include "resources.h"
 #include "scene/particles.h"
+#include "text.h"
 #include <GL/gl.h>
 #include <math.h>
 #include <stdio.h>
@@ -36,6 +37,7 @@ typedef struct scene_t_ {
     mat4 view;
     mat4 projection;
     particles_t particles;
+    text_t group_text;
 } scene_t;
 
 void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
@@ -66,6 +68,8 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
 
     particles_init(&scene->particles, &scene->primitives);
 
+    text_init(&scene->group_text, "Mehu");
+
     return scene;
 }
 
@@ -93,6 +97,8 @@ void scene_render(void *data, double time) {
     // draw point cube
     particles_draw(&scene->particles, scene->get_track, scene->get_value,
                    scene->view, scene->projection);
+
+    text_draw(&scene->group_text, scene->view, scene->projection);
 
     // draw post pass
     post_draw(&scene->post, scene->get_track, scene->get_value);

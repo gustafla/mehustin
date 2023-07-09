@@ -4,7 +4,7 @@
 #include <string.h>
 
 size_t read_file_to_str(const char *file_path, char **dst) {
-    FILE *file = fopen(file_path, "r");
+    FILE *file = fopen(file_path, "rb");
     if (!file)
         goto error;
 
