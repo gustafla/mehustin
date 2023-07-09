@@ -6,12 +6,13 @@
 #include "primitives.h"
 #include "rand.h"
 #include "resources.h"
+#include <GL/gl.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define POINTS 4096
+#define POINTS 204096
 
 void tracks_init(tracks_t *tracks, gettrack_t gettrack) {
     tracks->brightness = gettrack("post:brightness");
@@ -156,7 +157,7 @@ void scene_render(void *data, double time) {
     // draw point cube
     glClearColor(0., 0, 0., 1.);
     pass_fbo_bind(post_get_fbo(&scene->post));
-    glEnablei(GL_BLEND, post_get_fbo(&scene->post)->fbo);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
     glBlendEquation(GL_FUNC_ADD);
 
