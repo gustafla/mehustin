@@ -6,7 +6,7 @@ varying vec2 v_TexCoord;
 varying float v_FocusEffect;
 
 void main() {
-    vec3 light = vec3(0.4, 1.2, 2.5);
+    vec3 light = vec3(0.4, 1.2, 2.5) * 2.;
     if (length(v_TexCoord) > 1.) {
         discard;
     }

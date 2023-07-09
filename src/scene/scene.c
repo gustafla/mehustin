@@ -59,10 +59,11 @@ float random_float(void) {
     return ((float)random / (float)UINT16_MAX) * 2. - 1.;
 }
 
-void random_vec3(vec3 vec) {
+void random_vec4(vec4 vec) {
     vec[0] = random_float();
     vec[1] = random_float();
     vec[2] = random_float();
+    vec[3] = random_float();
 }
 
 void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
@@ -96,9 +97,11 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
         link_program(2, (GLuint[]){vertex_shader, fragment_shader});
 
     // create instances for points
-    vec3 point_instances[POINTS] = {0};
+    vec4 point_instances[POINTS] = {0};
     for (int i = 0; i < POINTS; i++) {
-        random_vec3(point_instances[i]);
+        random_vec4(point_instances[i]);
+        point_instances[i][3] += 0.3;
+        point_instances[i][3] *= point_instances[i][3];
     }
     glGenBuffers(1, &scene->point_instance_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, scene->point_instance_buffer);
@@ -121,7 +124,7 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
     // 2. quad instance world positions
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, scene->point_instance_buffer);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, NULL);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, NULL);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(2, 1);
     // ------------------------------------------------------------------------
