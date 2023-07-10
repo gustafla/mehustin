@@ -25,7 +25,7 @@ static GLuint make_depth_instace_buffer(size_t depth, float scale) {
     return buffer;
 }
 
-void text_init(text_t *text, char *msg) {
+void text_init(text_t *text, char *msg, size_t layers, float scale) {
     static unsigned char temp_bitmap[ATLAS_SIZE * ATLAS_SIZE];
 
     char *ttf = NULL;
@@ -102,8 +102,8 @@ void text_init(text_t *text, char *msg) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4,
                           (const void *)(sizeof(GLfloat) * 2));
 
-    text->depth = 32;
-    text->depth_instance_buffer = make_depth_instace_buffer(text->depth, 0.1);
+    text->depth = layers;
+    text->depth_instance_buffer = make_depth_instace_buffer(text->depth, scale);
     glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, text->depth_instance_buffer);
     glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 1, NULL);
@@ -124,16 +124,17 @@ void text_init(text_t *text, char *msg) {
     text->program = link_program(2, (GLuint[]){vertex_shader, fragment_shader});
 }
 
-void text_draw(text_t *text, mat4 view, mat4 projection) {
+void text_draw(text_t *text, mat4 view, mat4 projection, float z_scale) {
     mat4 model;
     float scale = 1. / FONT_HEIGHT;
-    glm_scale_make(model, (vec3){scale, -scale, scale});
+    glm_scale_make(model, (vec3){scale, -scale, scale * z_scale});
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, text->ftex);
 
     glUseProgram(text->program);
     glUniform1i(glGetUniformLocation(text->program, VAR_u_FontSampler), 0);
+    glUniform1i(glGetUniformLocation(text->program, VAR_u_Layers), text->depth);
     glUniformMatrix4fv(glGetUniformLocation(text->program, VAR_u_Model), 1,
                        GL_FALSE, (float *)model);
     glUniformMatrix4fv(glGetUniformLocation(text->program, VAR_u_View), 1,

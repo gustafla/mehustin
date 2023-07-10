@@ -1,8 +1,10 @@
 #include "particles.h"
 #include "api.h"
+#include "cglm/vec3.h"
 #include "rand.h"
 #include "resources.h"
 #include "scene/scene.h"
+#include "stb_perlin.h"
 #include <cglm/vec4.h>
 
 static float random_float(void) {
@@ -37,8 +39,8 @@ void particles_init(particles_t *particles, primitives_t *const primitives) {
     }
     glGenBuffers(1, &particles->point_instance_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, particles->point_instance_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(point_instances),
-                 (const GLvoid *)point_instances, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vec4) * POINTS,
+                 (const GLvoid *)point_instances, GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // set up vertex attributes -----------------------------------------------
@@ -59,6 +61,31 @@ void particles_init(particles_t *particles, primitives_t *const primitives) {
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, NULL);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glVertexAttribDivisor(2, 1);
+}
+
+void particles_deinit(particles_t *particles) {
+    glDeleteBuffers(1, &particles->point_instance_buffer);
+}
+
+void particles_simulate_step(particles_t *particles, float delta_time) {
+    glBindBuffer(GL_ARRAY_BUFFER, particles->point_instance_buffer);
+    float *point_instances = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+    for (size_t i = 0; i < POINTS * 4; i += 4) {
+        point_instances[i] +=
+            stb_perlin_noise3_seed(point_instances[i], point_instances[i + 1],
+                                   point_instances[i + 2], 0, 0, 0, 23) *
+            delta_time;
+        point_instances[i + 1] +=
+            stb_perlin_noise3_seed(point_instances[i], point_instances[i + 1],
+                                   point_instances[i + 2], 0, 0, 0, 3) *
+            delta_time;
+        point_instances[i + 2] +=
+            stb_perlin_noise3_seed(point_instances[i], point_instances[i + 1],
+                                   point_instances[i + 2], 0, 0, 0, 12) *
+            delta_time;
+    }
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void particles_draw(particles_t *particles, gettrack_t get_track,

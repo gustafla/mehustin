@@ -30,6 +30,7 @@
 typedef struct scene_t_ {
     getval_t get_value;
     gettrack_t get_track;
+    double t_1;
     primitives_t primitives;
     post_t post;
     int32_t width;
@@ -68,7 +69,7 @@ void *scene_init(int32_t width, int32_t height, gettrack_t gettrack,
 
     particles_init(&scene->particles, &scene->primitives);
 
-    text_init(&scene->group_text, "Mehu");
+    text_init(&scene->group_text, "Mehu", 128, 0.4);
 
     return scene;
 }
@@ -83,25 +84,32 @@ void scene_deinit(void *data) {
         scene_t *scene = data;
         post_deinit(&scene->post);
         primitives_deinit(&scene->primitives);
+        particles_deinit(&scene->particles);
         free(scene);
     }
 }
 
 void scene_render(void *data, double time) {
     scene_t *scene = data;
+
+    double delta_time = time - scene->t_1;
+
     glViewport(0, 0, scene->width, scene->height);
     glm_look_anyup(GET_CAM_POS, GET_CAM_DIR, scene->view);
     glClearColor(0., 0, 0., 1.);
     pass_fbo_bind(post_get_fbo(&scene->post));
 
     // draw point cube
+    particles_simulate_step(&scene->particles, delta_time);
     particles_draw(&scene->particles, scene->get_track, scene->get_value,
                    scene->view, scene->projection);
 
-    text_draw(&scene->group_text, scene->view, scene->projection);
+    text_draw(&scene->group_text, scene->view, scene->projection,
+              scene->get_value(scene->get_track("mehu_scale")));
 
     // draw post pass
     post_draw(&scene->post, scene->get_track, scene->get_value);
 
     // use MESA_DEBUG=1 env to debug
+    scene->t_1 = time;
 }

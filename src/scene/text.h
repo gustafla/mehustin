@@ -16,7 +16,7 @@ typedef struct text_t_ {
     GLuint program;
 } text_t;
 
-void text_init(text_t *text, char *msg);
-void text_draw(text_t *text, mat4 view, mat4 projection);
+void text_init(text_t *text, char *msg, size_t layers, float scale);
+void text_draw(text_t *text, mat4 view, mat4 projection, float z_scale);
 
 #endif
