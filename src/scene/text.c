@@ -10,6 +10,21 @@
 #define ATLAS_SIZE 2048
 #define FONT_HEIGHT 360
 
+static GLuint make_depth_instace_buffer(size_t depth, float scale) {
+    float *depths = malloc(depth * sizeof(float));
+    for (size_t i = 0; i < depth; i++) {
+        depths[i] = (-(float)i / (float)depth) * FONT_HEIGHT * scale;
+    }
+
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, depth * sizeof(float), (const GLvoid *)depths,
+                 GL_STATIC_DRAW);
+    free(depths);
+    return buffer;
+}
+
 void text_init(text_t *text, char *msg) {
     static unsigned char temp_bitmap[ATLAS_SIZE * ATLAS_SIZE];
 
@@ -44,17 +59,6 @@ void text_init(text_t *text, char *msg) {
             stbtt_GetBakedQuad(text->cdata, ATLAS_SIZE, ATLAS_SIZE, c - 32, &x,
                                &y, &q,
                                1); // 1=opengl & d3d10+,0=d3d9
-            printf("tex %f, %f\n", q.s0, q.t0);
-            printf("pos %f, %f\n", q.x0, q.y0);
-
-            printf("tex %f, %f\n", q.s1, q.t0);
-            printf("pos %f, %f\n", q.x1, q.y0);
-
-            printf("tex %f, %f\n", q.s1, q.t1);
-            printf("pos %f, %f\n", q.x1, q.y1);
-
-            printf("tex %f, %f\n", q.s0, q.t1);
-            printf("pos %f, %f\n", q.x0, q.y1);
 
             // x0 y0
             quads[i * quad_floats + 16] = quads[i * quad_floats + 0] = q.x0;
@@ -92,13 +96,21 @@ void text_init(text_t *text, char *msg) {
     glBindVertexArray(text->vao);
 
     glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, text->buffer);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, NULL);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4,
                           (const void *)(sizeof(GLfloat) * 2));
 
-    glBindVertexArray(0);
+    text->depth = 32;
+    text->depth_instance_buffer = make_depth_instace_buffer(text->depth, 0.1);
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, text->depth_instance_buffer);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 1, NULL);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glVertexAttribDivisor(2, 1);
+
+    glBindVertexArray(0);
 
     text->count = 6 * msg_len;
 
@@ -130,6 +142,6 @@ void text_draw(text_t *text, mat4 view, mat4 projection) {
                        GL_FALSE, (float *)projection);
 
     glBindVertexArray(text->vao);
-    glDrawArrays(GL_TRIANGLES, 0, text->count);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, text->count, text->depth);
     glBindVertexArray(0);
 }

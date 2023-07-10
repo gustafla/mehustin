@@ -8,9 +8,11 @@
 typedef struct text_t_ {
     stbtt_bakedchar cdata[96]; // ASCII 32..126 is 95 glyphs
     GLuint ftex;
-    GLuint buffer;
     GLuint vao;
+    GLuint buffer;
+    GLuint depth_instance_buffer;
     GLsizei count;
+    GLsizei depth;
     GLuint program;
 } text_t;
 
