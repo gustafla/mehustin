@@ -29,7 +29,7 @@ void text_init(text_t *text, char *msg, size_t layers, float scale) {
     static unsigned char temp_bitmap[ATLAS_SIZE * ATLAS_SIZE];
 
     char *ttf = NULL;
-    size_t ttf_size = read_file_to_str("LiberationSerif-Regular.ttf", &ttf);
+    size_t ttf_size = read_file_to_str("OpenSans-Bold.ttf", &ttf);
     assert(ttf_size != 0);
 
     stbtt_BakeFontBitmap((const unsigned char *)ttf, 0, FONT_HEIGHT,
