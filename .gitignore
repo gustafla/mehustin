@@ -8,6 +8,6 @@ debug/
 *.ogg
 *.png
 *.obj
-*.rocket
+*.ttf
 .cache/
 compile_commands.json

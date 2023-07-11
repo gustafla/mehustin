@@ -100,7 +100,7 @@ void scene_render(void *data, double time) {
     pass_fbo_bind(post_get_fbo(&scene->post));
 
     // draw point cube
-    particles_simulate_step(&scene->particles, delta_time);
+    particles_simulate_step(&scene->particles, delta_time * 0.1);
     particles_draw(&scene->particles, scene->get_track, scene->get_value,
                    scene->view, scene->projection);
 

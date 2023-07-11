@@ -1,0 +1,52 @@
+<sync rows="2048">
+	<tracks>
+		<track name="mehu_scale">
+			<key interpolation="2" value="0.30000001" row="0"/>
+			<key interpolation="1" value="1.2" row="56"/>
+			<key interpolation="0" value="20" row="81"/>
+		</track>
+		<track name="post:brightness">
+			<key interpolation="1" value="-1" row="0"/>
+			<key interpolation="0" value="0" row="31"/>
+			<key interpolation="0" value="0" row="32"/>
+			<key interpolation="1" value="1" row="40"/>
+			<key interpolation="0" value="0" row="48"/>
+		</track>
+		<track name="cam:focus">
+			<key interpolation="0" value="-1" row="0"/>
+			<key interpolation="0" value="-1" row="80"/>
+			<key interpolation="0" value="-1" row="81"/>
+		</track>
+		<track name="cam:pos.x">
+			<key interpolation="1" value="3" row="0"/>
+			<key interpolation="0" value="-1" row="80"/>
+			<key interpolation="0" value="0" row="81"/>
+		</track>
+		<track name="cam:pos.y">
+			<key interpolation="0" value="0.20000002" row="0"/>
+			<key interpolation="0" value="0.20000002" row="80"/>
+			<key interpolation="0" value="0" row="81"/>
+		</track>
+		<track name="cam:pos.z">
+			<key interpolation="0" value="0.39999962" row="0"/>
+			<key interpolation="0" value="0.39999962" row="80"/>
+			<key interpolation="0" value="2" row="81"/>
+		</track>
+		<track name="cam:dir.x">
+			<key interpolation="0" value="-0.20000011" row="0"/>
+			<key interpolation="0" value="-0.20000011" row="80"/>
+			<key interpolation="0" value="0" row="81"/>
+		</track>
+		<track name="cam:dir.y">
+			<key interpolation="0" value="0" row="0"/>
+			<key interpolation="0" value="0" row="80"/>
+			<key interpolation="0" value="0" row="81"/>
+		</track>
+		<track name="cam:dir.z">
+			<key interpolation="0" value="-0.89999998" row="0"/>
+			<key interpolation="0" value="-0.89999998" row="80"/>
+			<key interpolation="0" value="-1" row="81"/>
+		</track>
+	</tracks>
+	<bookmarks/>
+</sync>
