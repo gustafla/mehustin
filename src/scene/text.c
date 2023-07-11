@@ -33,7 +33,6 @@ void text_init(text_t *text, char *msg, size_t layers, float scale) {
     static unsigned char temp_bitmap[ATLAS_SIZE * ATLAS_SIZE];
 
 #ifdef MONOLITH
-    size_t ttf_size = OpenSans_Bold_ttf_len;
     char *ttf = OpenSans_Bold_ttf;
 #else
     char *ttf = NULL;
