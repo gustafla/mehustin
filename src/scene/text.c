@@ -4,6 +4,10 @@
 #include "stdlib.h"
 #include <stdio.h>
 
+#ifdef MONOLITH
+#include "font.h"
+#endif
+
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
@@ -28,14 +32,21 @@ static GLuint make_depth_instace_buffer(size_t depth, float scale) {
 void text_init(text_t *text, char *msg, size_t layers, float scale) {
     static unsigned char temp_bitmap[ATLAS_SIZE * ATLAS_SIZE];
 
+#ifdef MONOLITH
+    size_t ttf_size = OpenSans_Bold_ttf_len;
+    char *ttf = OpenSans_Bold_ttf;
+#else
     char *ttf = NULL;
     size_t ttf_size = read_file_to_str("OpenSans-Bold.ttf", &ttf);
     assert(ttf_size != 0);
+#endif
 
     stbtt_BakeFontBitmap((const unsigned char *)ttf, 0, FONT_HEIGHT,
                          temp_bitmap, ATLAS_SIZE, ATLAS_SIZE, 32, 96,
                          text->cdata); // no guarantee this fits!
+#ifndef MONOLITH
     free(ttf);
+#endif
 
     glGenTextures(1, &text->ftex);
     glActiveTexture(GL_TEXTURE0);

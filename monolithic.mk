@@ -19,10 +19,14 @@ endif
 
 .PHONY: monolith
 
-monolith: $(BUILDDIR)/shader_code.c $(BUILDDIR)/shader_code.h $(BUILDDIR)/music.h $(BUILDDIR)/sync_tracks.h $(TARGET)
+monolith: $(BUILDDIR)/shader_code.c $(BUILDDIR)/shader_code.h $(BUILDDIR)/music.h $(BUILDDIR)/sync_tracks.h $(BUILDDIR)/font.h $(TARGET)
 	echo done
 
 $(BUILDDIR)/music.h: music.ogg
+	@mkdir -p $(@D)
+	xxd -i $^ $@
+
+$(BUILDDIR)/font.h: OpenSans-Bold.ttf
 	@mkdir -p $(@D)
 	xxd -i $^ $@
 

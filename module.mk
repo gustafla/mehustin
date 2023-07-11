@@ -27,3 +27,4 @@ install: $(TARGET)
 	-cp -r shaders $(PREFIX)/bin/
 	-cp *.track $(PREFIX)/bin/
 	-cp music.ogg $(PREFIX)/bin/
+	-cp *.ttf $(PREFIX)/bin/
