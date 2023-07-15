@@ -7,13 +7,13 @@
 #include "scene.h"
 #include <cglm/mat4.h>
 
-#define POINTS 104096
+#define POINTS 10000
 
 typedef struct particles_t_ {
     GLuint point_instance_buffer;
     GLuint program;
     GLuint vao;
-
+    float *particle_velocity;
 } particles_t;
 
 void particles_init(particles_t *particles, primitives_t *const primitives);
