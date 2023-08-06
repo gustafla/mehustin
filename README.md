@@ -1,4 +1,6 @@
-# Mehustin is a system for building Linux demos using SDL2 and Rocket
+# Deprecated in favor of [gustafla/linux_demo](https://github.com/gustafla/linux_demo)
+
+## Mehustin is a system for building Linux demos using SDL2 and Rocket
 
 This initializes an SDL2 window with OpenGL support, after which it
 decodes music for playback using `stb_vorbis`.
